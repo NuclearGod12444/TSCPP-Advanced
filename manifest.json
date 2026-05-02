@@ -14,7 +14,9 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "/index.html",
+  "start_url": "/TSCPP-Advanced/index.html",
+  "scope": "/TSCPP-Advanced/",
+  "id": "/TSCPP-Advanced/",
   "background_color": "#000000",
   "display": "fullscreen",
   "theme_color": "#000000"
