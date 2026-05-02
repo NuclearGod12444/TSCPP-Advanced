@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSCPP Advanced Terminal v7.0</title>
+<title>TSCPP Advanced Terminal v8.0</title>
 <link rel="icon" type="image/png" href="TSCPP.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
@@ -19,7 +19,7 @@
     --surface: #0a120a;
     --border: #1a2e1a;
   }
- 
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   /*It is always good to have comments so I remember what is what and for anyone who reads this code can have an idea of what they are looking at.*/
   body {
@@ -568,7 +568,227 @@
   .setup-pip.done { background: var(--green); }
   .setup-pip.active { background: var(--green-dim); }
 
-  /* Hardware failure effects */
+  #hw-select-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 820px;
+    padding: 0 10px;
+  }
+  #hw-select-screen.visible { display: flex; }
+  .hw-section { width: 100%; }
+  .hw-section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--green-dim);
+    padding: 0 2px 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .hw-cards {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .hw-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 8px 12px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 140px;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .hw-card:hover { border-color: var(--green-dark); background: rgba(0,255,65,0.03); }
+  .hw-card.selected { border-color: var(--green-dim); background: rgba(0,255,65,0.06); }
+  .hw-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 4px; right: 6px;
+    color: var(--green);
+    font-size: 10px;
+  }
+  .hw-card-name { font-size: 11px; color: var(--green); margin-bottom: 3px; }
+  .hw-card-spec { font-size: 9px; color: #3a6a3a; line-height: 1.5; }
+  .hw-card-tier {
+    font-size: 8px;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .tier-budget { color: #888; }
+  .tier-entry  { color: #5a9a5a; }
+  .tier-mid    { color: var(--green-dim); }
+  .tier-high   { color: var(--cyan); }
+  .tier-flagship { color: var(--amber); }
+  .tier-server { color: var(--red); }
+  .hw-bottleneck {
+    border: 1px solid var(--amber);
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--amber);
+    background: rgba(255,170,0,0.05);
+    display: none;
+  }
+  .hw-bottleneck.visible { display: block; }
+  .hw-bottleneck strong { color: var(--red); }
+
+  #browser-overlay {
+    position: fixed; inset: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    background: #0a0a0a;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+  }
+  #browser-overlay.hidden { display: none; }
+  #browser-chrome {
+    background: #111;
+    border-bottom: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  #browser-tabs {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px 0;
+    gap: 2px;
+    background: #0a0a0a;
+  }
+  .br-tab {
+    padding: 4px 14px;
+    font-size: 11px;
+    color: #444;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .br-tab.active { color: var(--green); background: #111; border-color: #222; }
+  .br-tab-close { margin-left: 6px; font-size: 9px; opacity: 0.4; }
+  .br-tab-close:hover { opacity: 1; color: var(--red); }
+  #browser-new-tab { padding: 4px 10px; color: #333; cursor: pointer; font-size: 14px; }
+  #browser-new-tab:hover { color: var(--green); }
+  #browser-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+  }
+  .br-nav-btn {
+    color: #333;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    user-select: none;
+  }
+  .br-nav-btn:hover { color: var(--green); }
+  .br-nav-btn.disabled { color: #1a1a1a; cursor: default; }
+  #browser-url {
+    flex: 1;
+    background: #0a0a0a;
+    border: 1px solid #222;
+    color: var(--green);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 4px 10px;
+    outline: none;
+    caret-color: var(--green);
+    transition: border-color 0.2s;
+  }
+  #browser-url:focus { border-color: var(--green-dark); }
+  #browser-url.secure { border-color: #004400; }
+  #browser-url.danger { border-color: #440000; }
+  .br-go-btn {
+    background: var(--green-dark);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    padding: 4px 10px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .br-go-btn:hover { background: var(--green-dim); color: var(--bg); }
+  #browser-status {
+    font-size: 9px;
+    color: #2a2a2a;
+    padding: 2px 10px;
+    border-top: 1px solid #111;
+    letter-spacing: 1px;
+    min-height: 16px;
+  }
+  #browser-content {
+    flex: 1;
+    overflow-y: auto;
+    background: #080808;
+    color: #ccc;
+    padding: 24px 32px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  #browser-content::-webkit-scrollbar { width: 4px; }
+  #browser-content::-webkit-scrollbar-thumb { background: #222; }
+  .br-page-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    color: var(--green);
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+  .br-page-sub { font-size: 11px; color: #444; margin-bottom: 20px; letter-spacing: 1px; }
+  .br-link { color: var(--cyan); cursor: pointer; text-decoration: underline; }
+  .br-link:hover { color: var(--green); }
+  .br-section { margin-bottom: 20px; }
+  .br-section h3 { color: var(--green-dim); font-size: 12px; letter-spacing: 1px; margin-bottom: 8px; border-bottom: 1px solid #1a1a1a; padding-bottom: 4px; }
+  .br-p { color: #666; font-size: 12px; margin-bottom: 8px; }
+  .br-err { color: var(--red); font-family: 'Orbitron', monospace; font-size: 13px; text-align: center; margin-top: 60px; }
+  .br-err-sub { color: #333; font-size: 11px; text-align: center; margin-top: 8px; }
+
+  .sw-grid { display: flex; flex-direction: column; gap: 10px; }
+  .sw-item {
+    border: 1px solid #1a1a1a;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    background: #0d0d0d;
+  }
+  .sw-item:hover { border-color: #2a2a2a; }
+  .sw-info { flex: 1; }
+  .sw-name { color: var(--green); font-size: 12px; margin-bottom: 3px; }
+  .sw-desc { color: #555; font-size: 11px; }
+  .sw-meta { font-size: 10px; color: #333; margin-top: 3px; }
+  .sw-badge { font-size: 9px; padding: 2px 6px; border: 1px solid; font-family: 'Orbitron', monospace; letter-spacing: 1px; white-space: nowrap; }
+  .sw-badge.free { color: var(--green-dim); border-color: var(--green-dark); }
+  .sw-badge.installed { color: var(--amber); border-color: #442200; }
+  .sw-badge.restricted { color: var(--red); border-color: #440000; }
+  .sw-install-btn {
+    background: transparent;
+    border: 1px solid var(--green-dark);
+    color: var(--green-dim);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    padding: 5px 10px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .sw-install-btn:hover { background: var(--green-dark); color: var(--green); }
+  .sw-install-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+</style>
   @keyframes glitch-h {
     0%   { transform: translate(0); }
     20%  { transform: translate(-4px, 1px) skewX(2deg); filter: hue-rotate(90deg); }
@@ -664,12 +884,14 @@
 <div id="setup-overlay">
   <div class="setup-logo">TSCPP</div>
   <div class="setup-title">FIRST-TIME SETUP</div>
-  <div class="setup-box">
+
+  <div id="setup-pw-box" class="setup-box">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="setup-step-label" id="setup-step-label">STEP 1 OF 2</div>
+      <div class="setup-step-label" id="setup-step-label">STEP 1 OF 3</div>
       <div class="setup-progress">
         <div class="setup-pip active" id="pip-0"></div>
         <div class="setup-pip" id="pip-1"></div>
+        <div class="setup-pip" id="pip-2"></div>
       </div>
     </div>
     <div class="setup-step-desc" id="setup-desc">
@@ -687,7 +909,38 @@
     <div class="setup-warn" id="setup-warn"></div>
     <button class="setup-btn" id="setup-next-btn" onclick="setupNext()">CONTINUE →</button>
   </div>
-  <div style="font-size:10px;color:#1a3a1a;letter-spacing:1px;">PASSWORDS ARE STORED LOCALLY — NEVER TRANSMITTED</div>
+
+  <div id="hw-select-screen">
+    <div style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:0 2px;">
+      <div class="setup-step-label">STEP 3 OF 3 — BUILD YOUR SYSTEM</div>
+      <div class="setup-progress">
+        <div class="setup-pip done"></div>
+        <div class="setup-pip done"></div>
+        <div class="setup-pip active"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#3a6a3a;padding:0 2px;">Select one CPU, one GPU, and one RAM kit. Incompatible combinations will show a bottleneck warning.</div>
+
+    <div class="hw-section">
+      <div class="hw-section-title"><span>CPU — PROCESSOR</span><span id="cpu-sel-label" style="color:var(--green-dim);">none selected</span></div>
+      <div class="hw-cards" id="cpu-cards"></div>
+    </div>
+    <div class="hw-section">
+      <div class="hw-section-title"><span>GPU — GRAPHICS CARD</span><span id="gpu-sel-label" style="color:var(--green-dim);">none selected</span></div>
+      <div class="hw-cards" id="gpu-cards"></div>
+    </div>
+    <div class="hw-section">
+      <div class="hw-section-title"><span>RAM — MEMORY</span><span id="ram-sel-label" style="color:var(--green-dim);">none selected</span></div>
+      <div class="hw-cards" id="ram-cards"></div>
+    </div>
+
+    <div class="hw-bottleneck" id="hw-bottleneck-box"></div>
+    <div style="display:flex;justify-content:flex-end;width:100%;">
+      <button class="setup-btn" id="hw-confirm-btn" onclick="confirmHardware()" disabled>BUILD SYSTEM →</button>
+    </div>
+  </div>
+
+  <div style="font-size:10px;color:#1a3a1a;letter-spacing:1px;">ALL DATA IS STORED LOCALLY — NEVER TRANSMITTED</div>
 </div>
 
 <div id="lockscreen" class="hidden">
@@ -695,12 +948,31 @@
     <div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div>
   </div>
   <div class="lock-logo">TSCPP</div>
-  <div class="lock-sub">ADVANCED TERMINAL v7.0</div>
+  <div class="lock-sub">ADVANCED TERMINAL v8.0</div>
   <div class="lock-input-wrap" id="lock-wrap">
     <span style="color:#1e3e1e;font-size:11px;">KEY:</span>
     <input type="password" id="lock-input" autofocus autocomplete="off" placeholder="ENTER ACCESS KEY">
   </div>
   <div class="lock-hint">UNAUTHORIZED ACCESS IS PROHIBITED</div>
+</div>
+
+<div id="browser-overlay" class="hidden">
+  <div id="browser-chrome">
+    <div id="browser-tabs">
+      <div class="br-tab active" id="br-tab-0">New Tab <span class="br-tab-close" onclick="brCloseTab(0)">✕</span></div>
+      <div id="browser-new-tab" onclick="brNewTab()">+</div>
+    </div>
+    <div id="browser-nav">
+      <span class="br-nav-btn" id="br-back" onclick="brBack()">←</span>
+      <span class="br-nav-btn" id="br-fwd"  onclick="brForward()">→</span>
+      <span class="br-nav-btn" onclick="brReload()">↺</span>
+      <input id="browser-url" type="text" placeholder="tscpp://" autocomplete="off" spellcheck="false">
+      <button class="br-go-btn" onclick="brNavigate()">GO</button>
+      <span class="br-nav-btn" title="Close Browser" onclick="brClose()" style="margin-left:auto;">✕</span>
+    </div>
+    <div id="browser-status">Ready</div>
+  </div>
+  <div id="browser-content"></div>
 </div>
 
 <!-- Main Shell -->
@@ -801,7 +1073,6 @@
 </div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
 const MASTER_KEY = localStorage.getItem('tscpp_master_key') || null;
 const ROOT_KEY   = localStorage.getItem('tscpp_root_key')   || null;
 const FIRST_RUN  = !MASTER_KEY;
@@ -837,7 +1108,6 @@ let historyIdx  = cmdHistory.length;
 
 function saveHistory() { localStorage.setItem('tscpp_history', JSON.stringify(cmdHistory.slice(-200))); }
 
-// ─── SYSTEM FILES (never stored in localStorage — always regenerated) ─────────
 const SYSTEM_FILES = {
   "kernel.cfg":      "KERNEL_VER=6.5.0-tscpp\nSCHED=CFS\nPREEMPT=FULL\nHZ=1000\nNOCADAPT=0",
   "firewall.rules":  "POLICY=DROP\nALLOW 22/tcp\nALLOW 443/tcp\nALLOW 53/udp\nDENY ALL",
@@ -851,7 +1121,6 @@ const SYSTEM_FILES = {
   "passwd":          "root:x:0:0:root:/root:/bin/tscpp_sh\nagent:x:1001:1001::/home/agent:/bin/sh",
 };
 
-// Consequence definitions for each system file
 const FILE_CONSEQUENCES = {
   "kernel.cfg": {
     erase: { msg: "!! KERNEL CONFIG MISSING — SYSTEM UNSTABLE", severity: "fatal", effects: ["kernel"] },
@@ -895,20 +1164,17 @@ const FILE_CONSEQUENCES = {
 };
 
 let files = JSON.parse(localStorage.getItem('tscpp_files') || 'null') || {
-  "welcome.txt":  "TSCPP Terminal v7.0 — Connection required for cloud sync.",
+  "welcome.txt":  "TSCPP Terminal v8.0 — Connection required for cloud sync.",
   "note.txt":     "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
   "readme.md":    "Welcome agent. Type HELP for command reference.",
 };
-// Merge system files in (don't overwrite if user already has them)
 Object.assign(files, ...Object.entries(SYSTEM_FILES).filter(([k])=>!(k in files)).map(([k,v])=>({[k]:v})));
 function saveFiles() { localStorage.setItem('tscpp_files', JSON.stringify(files)); }
 
-// ─── DIRECTORY TREE ───────────────────────────────────────────────────────────
 let dirs = JSON.parse(localStorage.getItem('tscpp_dirs') || 'null') ||
   ['/','home','/home/agent','/sys','/etc','/var','/var/log','/tmp','/root'];
 function saveDirs() { localStorage.setItem('tscpp_dirs', JSON.stringify(dirs)); }
 
-// Where each file lives. Persisted so user-created files keep their location.
 const DEFAULT_LOCATIONS = {
   'kernel.cfg':'/sys','firewall.rules':'/sys','auth.db':'/sys',
   'network.conf':'/sys','enc_keys.dat':'/sys','boot.cfg':'/sys',
@@ -919,7 +1185,6 @@ const DEFAULT_LOCATIONS = {
 let fileLocations = JSON.parse(localStorage.getItem('tscpp_locs') || 'null') || { ...DEFAULT_LOCATIONS };
 function saveLocs() { localStorage.setItem('tscpp_locs', JSON.stringify(fileLocations)); }
 
-// Directory read/write permissions
 const DIR_PERMS = {
   '/':           { r:'all',  w:'root' },
   '/home':       { r:'all',  w:'root' },
@@ -936,7 +1201,7 @@ function canRead(dir)  { const p=DIR_PERMS[dir]||{r:'all',w:'all'}; return p.r==
 function canWrite(dir) { const p=DIR_PERMS[dir]||{r:'all',w:'all'}; return p.w==='all'||state.admin; }
 
 function normPath(p) {
-  // Resolve a path relative to cwd; clean up // and trailing /
+ 
   if (!p) return state.cwd;
   const base = p.startsWith('/') ? p : state.cwd + '/' + p;
   const parts = base.split('/').filter(Boolean);
@@ -952,7 +1217,6 @@ function filesInDir(dir) {
   return Object.keys(files).filter(f => (fileLocations[f] || '/home/agent') === dir);
 }
 
-// Resolve "note.txt", "/home/agent/note.txt", or "/sys/kernel.cfg" → { name, dir }
 function resolveFile(arg) {
   if (!arg) return null;
   if (arg.includes('/')) {
@@ -960,13 +1224,11 @@ function resolveFile(arg) {
     const name = arg.substring(arg.lastIndexOf('/') + 1);
     return { name, dir: normPath(dir) };
   }
-  // bare name — look in cwd first, then search all dirs
   if (files[arg] && (fileLocations[arg]||'/home/agent') === state.cwd) return { name:arg, dir:state.cwd };
   if (files[arg]) return { name:arg, dir:fileLocations[arg]||'/home/agent' };
   return { name:arg, dir:state.cwd }; // doesn't exist yet — will go in cwd
 }
 
-// ─── CMD_HELP (usage explanations) ───────────────────────────────────────────
 const CMD_HELP = {
   help:         { desc:'List all commands or get help on one',     usage:'help [command]',              ex:['help','help cat','help hack'] },
   clear:        { desc:'Clear the terminal output',                usage:'clear',                       ex:['clear'] },
@@ -1056,11 +1318,10 @@ function printUsage(cmd) {
   print('', '');
 }
 
-// ─── SESSION TIMEOUT ─────────────────────────────────────────────────────────
 let lastActivity = Date.now();
 let timeoutWarned = false;
-const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-const TIMEOUT_WARN_MS    = 4.5 * 60 * 1000; // warn at 4:30
+const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
+const TIMEOUT_WARN_MS    = 4.5 * 60 * 1000;
 
 document.addEventListener('keydown', () => {
   lastActivity  = Date.now();
@@ -1080,17 +1341,14 @@ setInterval(() => {
 }, 10000);
 
 function sessionLockout() {
-  // Save state before locking
   state.admin = false;
   saveState();
   state.locked = true;
   output.innerHTML = '';
-  // Show lock screen again
   const ls = document.getElementById('lockscreen');
   ls.classList.remove('hidden');
   document.getElementById('lock-input').value = '';
   document.getElementById('lock-input').focus();
-  // Flash a message underneath briefly
   const msg = document.createElement('div');
   msg.style.cssText = 'position:absolute;bottom:80px;font-size:11px;color:var(--red);letter-spacing:2px;font-family:Orbitron,monospace;';
   msg.textContent = 'SESSION TIMED OUT — RE-AUTHENTICATE';
@@ -1099,7 +1357,6 @@ function sessionLockout() {
   timeoutWarned = false;
 }
 
-// ─── SYSTEM HEALTH ────────────────────────────────────────────────────────────
 let sysHealth = JSON.parse(localStorage.getItem('tscpp_health') || 'null') || {
   kernel: true, firewall: true, auth: true, network: true,
   encryption: true, boot: true, log: true, hosts: true, cron: true,
@@ -1107,12 +1364,10 @@ let sysHealth = JSON.parse(localStorage.getItem('tscpp_health') || 'null') || {
 function saveSysHealth() { localStorage.setItem('tscpp_health', JSON.stringify(sysHealth)); }
 
 function getInstability() {
-  // Count how many health flags are false
   return Object.values(sysHealth).filter(v => !v).length;
 }
 
 function hwFailureChance() {
-  // Base 2%, +6% per broken system component, max 40%
   return Math.min(0.40, 0.02 + getInstability() * 0.06);
 }
 
@@ -1126,7 +1381,6 @@ const scannedNetworks = [
   { id:"07", ssid:"TSCPP_FBI",       signal:"WEAK",    enc:"WPA3", chan:36,  mac:"94:10:3E:33:44:55" },
 ];
 
-// ─── DOM REFS ─────────────────────────────────────────────────────────────────
 const output       = document.getElementById('output');
 const cmdInput     = document.getElementById('cmd-input');
 const promptSpan   = document.getElementById('prompt-text');
@@ -1134,7 +1388,6 @@ const threatBadge  = document.getElementById('threat-badge');
 const alertOverlay = document.getElementById('alert-overlay');
 const acHint       = document.getElementById('autocomplete-hint');
 
-// ─── COMMANDS LIST (for autocomplete) ────────────────────────────────────────
 const COMMANDS = [
   'help','scan','hack','wifi-override','tunnel','status','clear','panic','whoami',
   'reboot','login','logout','ls','cat','write','erase','rename','download','locate',
@@ -1146,7 +1399,6 @@ const COMMANDS = [
   'pwd','cd','mkdir','rmdir','man','passwd',
 ];
 
-// ─── UTILITIES ───────────────────────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
@@ -1167,7 +1419,6 @@ function randCoords() {
   return `${(Math.random()*180-90).toFixed(6)}, ${(Math.random()*360-180).toFixed(6)}`;
 }
 
-// ─── OUTPUT ──────────────────────────────────────────────────────────────────
 function print(text, cls='', instant=false) {
   const d = document.createElement('div');
   d.className = 'line' + (cls ? ' '+cls : '');
@@ -1203,9 +1454,152 @@ function printTable(headers, rows, cls='') {
   rows.forEach(r => print(fmt(r), cls));
 }
 
-// ─── SETUP WIZARD ────────────────────────────────────────────────────────────
-let setupStep = 1; // 1 = lock key, 2 = root key
+let setupStep = 1;
 let pendingMasterKey = null;
+
+const HW_CATALOG = {
+  cpu: [
+    { id:'cel-g6900',  name:'Intel Celeron G6900',  tier:1, tierLabel:'BUDGET',   cores:'2c/2t', clock:'3.4GHz', tdp:46,  spec:'2-core, no HT, 46W TDP' },
+    { id:'i3-12100',   name:'Intel Core i3-12100',  tier:2, tierLabel:'ENTRY',    cores:'4c/8t', clock:'4.3GHz', tdp:60,  spec:'4-core, 60W TDP, DDR5 ready' },
+    { id:'r3-4100',    name:'AMD Ryzen 3 4100',     tier:2, tierLabel:'ENTRY',    cores:'4c/8t', clock:'4.0GHz', tdp:65,  spec:'4-core, 65W TDP, PCIe 3.0' },
+    { id:'i5-12600k',  name:'Intel Core i5-12600K', tier:3, tierLabel:'MID',      cores:'10c/16t',clock:'4.9GHz',tdp:125, spec:'10-core hybrid, 125W TDP' },
+    { id:'r5-5600x',   name:'AMD Ryzen 5 5600X',    tier:3, tierLabel:'MID',      cores:'6c/12t', clock:'4.6GHz',tdp:65,  spec:'6-core, 65W TDP, PCIe 4.0' },
+    { id:'i7-13700k',  name:'Intel Core i7-13700K', tier:4, tierLabel:'HIGH',     cores:'16c/24t',clock:'5.4GHz',tdp:253, spec:'16-core hybrid, 253W TDP' },
+    { id:'r7-7700x',   name:'AMD Ryzen 7 7700X',    tier:4, tierLabel:'HIGH',     cores:'8c/16t', clock:'5.4GHz',tdp:105, spec:'8-core, 105W TDP, DDR5 native' },
+    { id:'i9-13900k',  name:'Intel Core i9-13900K', tier:5, tierLabel:'FLAGSHIP', cores:'24c/32t',clock:'5.8GHz',tdp:253, spec:'24-core hybrid, 253W TDP' },
+    { id:'r9-7950x',   name:'AMD Ryzen 9 7950X',    tier:5, tierLabel:'FLAGSHIP', cores:'16c/32t',clock:'5.7GHz',tdp:170, spec:'16-core, 170W TDP, AM5 socket' },
+    { id:'xeon-w2295', name:'Intel Xeon W-2295',    tier:6, tierLabel:'SERVER',   cores:'18c/36t',clock:'4.6GHz',tdp:205, spec:'18-core ECC, 205W, LGA 2066' },
+  ],
+  gpu: [
+    { id:'uhd730',     name:'Intel UHD 730',        tier:1, tierLabel:'INTEGRATED', vram:'Shared', tdp:0,   spec:'Integrated, shares system RAM' },
+    { id:'gtx1650',    name:'NVIDIA GTX 1650',      tier:2, tierLabel:'BUDGET',     vram:'4GB GDDR6', tdp:75,  spec:'Turing arch, 75W, no ext power' },
+    { id:'rx6500xt',   name:'AMD RX 6500 XT',       tier:2, tierLabel:'BUDGET',     vram:'4GB GDDR6', tdp:107, spec:'RDNA2, 107W, PCIe 4.0 x4' },
+    { id:'rtx3060',    name:'NVIDIA RTX 3060',      tier:3, tierLabel:'MID',        vram:'12GB GDDR6',tdp:170, spec:'Ampere, 12GB VRAM, DLSS 2.0' },
+    { id:'rx6600',     name:'AMD RX 6600',          tier:3, tierLabel:'MID',        vram:'8GB GDDR6', tdp:132, spec:'RDNA2, FSR support, 132W' },
+    { id:'rtx3070ti',  name:'NVIDIA RTX 3070 Ti',   tier:4, tierLabel:'HIGH',       vram:'8GB GDDR6X',tdp:290, spec:'Ampere, 290W, DLSS 2.0' },
+    { id:'rx6800xt',   name:'AMD RX 6800 XT',       tier:4, tierLabel:'HIGH',       vram:'16GB GDDR6',tdp:300, spec:'RDNA2, 16GB VRAM, 300W' },
+    { id:'rtx4080',    name:'NVIDIA RTX 4080',      tier:5, tierLabel:'FLAGSHIP',   vram:'16GB GDDR6X',tdp:320, spec:'Ada Lovelace, DLSS 3.0, 320W' },
+    { id:'rx7900xtx',  name:'AMD RX 7900 XTX',     tier:5, tierLabel:'FLAGSHIP',   vram:'24GB GDDR6',tdp:355, spec:'RDNA3, 24GB VRAM, 355W' },
+    { id:'rtx4090',    name:'NVIDIA RTX 4090',      tier:6, tierLabel:'ULTRA',      vram:'24GB GDDR6X',tdp:450, spec:'Ada Lovelace, fastest consumer GPU' },
+  ],
+  ram: [
+    { id:'4gb-ddr4',   name:'4GB DDR4-2400',        tier:1, tierLabel:'BUDGET',   size:'4GB',   speed:'2400MHz', kit:'1×4GB',   spec:'Single channel, tight budget' },
+    { id:'8gb-ddr4',   name:'8GB DDR4-3200',         tier:2, tierLabel:'ENTRY',   size:'8GB',   speed:'3200MHz', kit:'2×4GB',   spec:'Dual channel, entry workloads' },
+    { id:'16gb-ddr4',  name:'16GB DDR4-3600',        tier:3, tierLabel:'MID',     size:'16GB',  speed:'3600MHz', kit:'2×8GB',   spec:'Dual channel, solid baseline' },
+    { id:'32gb-ddr5',  name:'32GB DDR5-4800',        tier:4, tierLabel:'HIGH',    size:'32GB',  speed:'4800MHz', kit:'2×16GB',  spec:'DDR5 dual channel, fast XMP' },
+    { id:'64gb-ddr5',  name:'64GB DDR5-6000',        tier:5, tierLabel:'FLAGSHIP',size:'64GB',  speed:'6000MHz', kit:'2×32GB',  spec:'Overclocked DDR5, extreme bandwidth' },
+    { id:'128gb-ecc',  name:'128GB DDR5-5600 ECC',   tier:6, tierLabel:'SERVER',  size:'128GB', speed:'5600MHz ECC', kit:'8×16GB', spec:'Error-correcting, server-grade' },
+  ],
+};
+
+let selectedHW = JSON.parse(localStorage.getItem('tscpp_hardware') || 'null') || null;
+
+function saveHW() { localStorage.setItem('tscpp_hardware', JSON.stringify(selectedHW)); }
+
+function hwTierClass(label) {
+  return { BUDGET:'tier-budget', ENTRY:'tier-entry', MID:'tier-mid', HIGH:'tier-high',
+           FLAGSHIP:'tier-flagship', ULTRA:'tier-flagship', SERVER:'tier-server',
+           INTEGRATED:'tier-budget', WORKSTATION:'tier-high' }[label] || '';
+}
+
+function detectBottlenecks(cpu, gpu, ram) {
+  const issues = [];
+  if (!cpu || !gpu || !ram) return issues;
+  if (gpu.tier > cpu.tier + 1)
+    issues.push(`<strong>CPU BOTTLENECK</strong> — ${cpu.name} cannot fully feed ${gpu.name}. Expect ${Math.min(40, (gpu.tier - cpu.tier) * 12)}% GPU performance loss.`);
+  if (ram.tier < cpu.tier - 2)
+    issues.push(`<strong>RAM BOTTLENECK</strong> — ${ram.size} is insufficient for ${cpu.name}. Commands will stall waiting on memory.`);
+  if (ram.tier < 3 && gpu.tier > 3)
+    issues.push(`<strong>VRAM PRESSURE</strong> — Low system RAM will cause GPU memory spill. Heavy ops will be slower.`);
+  if (cpu.tier > gpu.tier + 2)
+    issues.push(`<strong>CPU OVERKILL</strong> — ${cpu.name} is wasted with ${gpu.name}. Visual throughput will bottleneck on GPU.`);
+  if (cpu.id === 'xeon-w2295' && gpu.tier < 4)
+    issues.push(`<strong>SERVER MISMATCH</strong> — Server-grade CPU paired with a consumer-tier GPU is an unusual combination.`);
+  return issues;
+}
+
+function getHWEffects() {
+  if (!selectedHW) return { speedMult:1, thermalChance:0.04, maxFiles:100, bottlenecked:false };
+  const cpu = HW_CATALOG.cpu.find(c => c.id === selectedHW.cpu);
+  const ram = HW_CATALOG.ram.find(r => r.id === selectedHW.ram);
+  const gpu = HW_CATALOG.gpu.find(g => g.id === selectedHW.gpu);
+  const cpuTier = cpu?.tier || 3;
+  const ramTier = ram?.tier || 3;
+  const gpuTier = gpu?.tier || 3;
+  const bottlenecks = detectBottlenecks(cpu, gpu, ram);
+  const bottleneckPenalty = bottlenecks.length * 0.15;
+  return {
+    speedMult:     Math.max(0.4, 1 - (cpuTier - 1) * 0.12 + bottleneckPenalty),
+    thermalChance: Math.max(0.01, 0.08 - cpuTier * 0.01 + (cpu?.tdp > 200 ? 0.03 : 0)),
+    maxFiles:      ramTier < 2 ? 15 : ramTier < 3 ? 40 : 999,
+    ramWarn:       ramTier < 2,
+    bottlenecked:  bottlenecks.length > 0,
+    gpuTier,
+    cpuTier,
+    ramTier,
+  };
+}
+
+function buildHWCards() {
+  ['cpu','gpu','ram'].forEach(type => {
+    const container = document.getElementById(`${type}-cards`);
+    if (!container) return;
+    container.innerHTML = '';
+    HW_CATALOG[type].forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'hw-card';
+      card.id = `hw-card-${item.id}`;
+      card.innerHTML = `
+        <div class="hw-card-tier ${hwTierClass(item.tierLabel)}">${item.tierLabel}</div>
+        <div class="hw-card-name">${item.name}</div>
+        <div class="hw-card-spec">${item.cores || item.vram || item.size || ''} · ${item.clock || item.speed || ''}<br>${item.spec}</div>
+      `;
+      card.onclick = () => selectHWCard(type, item.id);
+      container.appendChild(card);
+    });
+  });
+}
+
+let hwSelections = { cpu: null, gpu: null, ram: null };
+
+function selectHWCard(type, id) {
+  document.querySelectorAll(`#${type}-cards .hw-card`).forEach(c => c.classList.remove('selected'));
+  document.getElementById(`hw-card-${id}`).classList.add('selected');
+  hwSelections[type] = id;
+  const item = HW_CATALOG[type].find(x => x.id === id);
+  document.getElementById(`${type}-sel-label`).textContent = item.name;
+  updateBottleneckDisplay();
+  const allSelected = hwSelections.cpu && hwSelections.gpu && hwSelections.ram;
+  document.getElementById('hw-confirm-btn').disabled = !allSelected;
+}
+
+function updateBottleneckDisplay() {
+  const cpu = HW_CATALOG.cpu.find(c => c.id === hwSelections.cpu);
+  const gpu = HW_CATALOG.gpu.find(g => g.id === hwSelections.gpu);
+  const ram = HW_CATALOG.ram.find(r => r.id === hwSelections.ram);
+  const box = document.getElementById('hw-bottleneck-box');
+  const issues = detectBottlenecks(cpu, gpu, ram);
+  if (issues.length > 0) {
+    box.innerHTML = '⚠ COMPATIBILITY WARNINGS:<br>' + issues.map(i => `• ${i}`).join('<br>');
+    box.classList.add('visible');
+  } else {
+    box.classList.remove('visible');
+    box.innerHTML = '';
+  }
+}
+
+function confirmHardware() {
+  selectedHW = { cpu: hwSelections.cpu, gpu: hwSelections.gpu, ram: hwSelections.ram };
+  saveHW();
+  const so = document.getElementById('setup-overlay');
+  so.style.transition = 'opacity 0.5s';
+  so.style.opacity = '0';
+  setTimeout(() => {
+    so.classList.add('hidden');
+    document.getElementById('lockscreen').classList.remove('hidden');
+    document.getElementById('lock-input').focus();
+  }, 500);
+}
 
 function setupNext() {
   const i1 = document.getElementById('setup-input1');
@@ -1222,9 +1616,8 @@ function setupNext() {
 
   if (setupStep === 1) {
     pendingMasterKey = p1;
-    // Move to step 2 — root key
     setupStep = 2;
-    document.getElementById('setup-step-label').textContent = 'STEP 2 OF 2';
+    document.getElementById('setup-step-label').textContent = 'STEP 2 OF 3';
     document.getElementById('pip-0').className = 'setup-pip done';
     document.getElementById('pip-1').className = 'setup-pip active';
     document.getElementById('setup-desc').innerHTML =
@@ -1232,7 +1625,7 @@ function setupNext() {
        This is the password used to elevate to ROOT inside the terminal. Keep it separate from your lock key.`;
     document.getElementById('setup-field1-label').textContent = 'ROOT KEY';
     document.getElementById('setup-field2-label').textContent = 'CONFIRM ROOT KEY';
-    document.getElementById('setup-next-btn').textContent = 'FINISH SETUP →';
+    document.getElementById('setup-next-btn').textContent = 'CONTINUE →';
     i1.value = ''; i2.value = ''; i1.focus();
     return;
   }
@@ -1242,40 +1635,30 @@ function setupNext() {
       warn.textContent = 'Root key must differ from your lock screen key.';
       i1.classList.add('bad'); return;
     }
-    // Save both keys
     localStorage.setItem('tscpp_master_key', pendingMasterKey);
     localStorage.setItem('tscpp_root_key', p1);
-    // Apply to runtime (we can't reassign const — use wrapper vars instead)
     _activeKeys.master = pendingMasterKey;
     _activeKeys.root   = p1;
     document.getElementById('pip-1').className = 'setup-pip done';
+    document.getElementById('pip-2').className = 'setup-pip active';
 
-    // Fade out setup, show lock screen
-    const so = document.getElementById('setup-overlay');
-    so.style.transition = 'opacity 0.5s';
-    so.style.opacity = '0';
-    setTimeout(() => {
-      so.classList.add('hidden');
-      document.getElementById('lockscreen').classList.remove('hidden');
-      document.getElementById('lock-input').focus();
-    }, 500);
+    document.getElementById('setup-pw-box').style.display = 'none';
+    document.getElementById('hw-select-screen').classList.add('visible');
+    buildHWCards();
   }
 }
 
-// ─── ACTIVE KEYS (mutable at runtime) ────────────────────────────────────────
 const _activeKeys = {
   master: localStorage.getItem('tscpp_master_key') || 'TSCPP-1993',
   root:   localStorage.getItem('tscpp_root_key')   || 'Secret@Agent983',
 };
 
-// Pressing Enter in setup fields triggers setupNext
 ['setup-input1','setup-input2'].forEach(id => {
   document.getElementById(id).addEventListener('keydown', e => {
     if (e.key === 'Enter') setupNext();
   });
 });
 
-// On load — show setup if first run, otherwise show lock screen
 window.addEventListener('DOMContentLoaded', () => {
   const hasMaster = !!localStorage.getItem('tscpp_master_key');
   if (!hasMaster) {
@@ -1289,7 +1672,306 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ─── TOAST ───────────────────────────────────────────────────────────────────
+let installedSoftware = JSON.parse(localStorage.getItem('tscpp_software') || '[]');
+function saveSoftware() { localStorage.setItem('tscpp_software', JSON.stringify(installedSoftware)); }
+
+const SOFTWARE_CATALOG = [
+  { id:'crack-suite',    name:'CrackSuite v3.2',      desc:'GPU-accelerated hash cracker. Reduces crack attempts needed and increases success rate.',  size:'48MB', req:'uplink', effect:'crack_boost',    darkweb:false },
+  { id:'stealth-vpn',   name:'StealthVPN Pro',        desc:'Military-grade VPN with rotating exit nodes. Reduces trace risk by 35 instead of 20 per use.', size:'12MB', req:null,   effect:'vpn_boost',     darkweb:false },
+  { id:'proxy-chain',   name:'ProxyChain-NG',         desc:'Automatically chains 3 proxies per hop. Near-zero trace signature.',                         size:'6MB',  req:null,   effect:'proxy_boost',   darkweb:false },
+  { id:'nmap-elite',    name:'NMAP Elite Edition',    desc:'Advanced OS fingerprinting and CVE database. Reveals more vulnerabilities in scans.',          size:'22MB', req:'uplink', effect:'nmap_boost',  darkweb:false },
+  { id:'net-scanner',   name:'NetScanner Pro',        desc:'Upgrades scan to reveal hidden SSIDs, WPS status, connected clients, and signal maps.',       size:'31MB', req:'uplink', effect:'scan_boost',  darkweb:false },
+  { id:'ram-optim',     name:'RAMOptimizer 2.0',      desc:'Reduces RAM bottleneck penalty. Compresses memory pages and pre-loads critical modules.',      size:'4MB',  req:null,   effect:'ram_fix',       darkweb:false },
+  { id:'heat-daemon',   name:'ThermalControl Daemon', desc:'Adaptive thermal throttle prevention. Reduces CPU throttle frequency significantly.',           size:'2MB',  req:null,   effect:'thermal_fix',   darkweb:false },
+  { id:'sys-monitor',   name:'SysMonitor Elite',      desc:'Real-time hardware stats in sidebar. Shows live temps, clock speeds, and memory pressure.',     size:'8MB',  req:null,   effect:'sysmon',        darkweb:false },
+  { id:'bruteX',        name:'BruteX Framework',      desc:'DARKWEB — Advanced credential attack suite. Massively boosts bruteforce success rate.',         size:'94MB', req:'tunnel', effect:'brute_boost', darkweb:true  },
+  { id:'ghost-kernel',  name:'GhostKernel Patch',     desc:'DARKWEB — Kernel-level anonymization. Trace risk passively decreases 2× faster.',              size:'210MB',req:'tunnel', effect:'ghost',        darkweb:true  },
+];
+
+const FAKE_SITES = {
+  'tscpp://home':        renderHomePage,
+  'tscpp://store':       renderStorePage,
+  'tscpp://docs':        renderDocsPage,
+  'tscpp://news':        renderNewsPage,
+  'tscpp://network':     renderNetworkPage,
+  'dark://market':       renderDarkMarket,
+  'dark://forums':       renderDarkForums,
+};
+
+let brHistory    = [['tscpp://home']];
+let brHistoryIdx = 0;
+let brTabs       = [{ url:'tscpp://home', title:'Home' }];
+let brActiveTab  = 0;
+
+function brOpen(url) {
+  document.getElementById('browser-overlay').classList.remove('hidden');
+  document.getElementById('shell').style.display = 'none';
+  brNavigateTo(url || 'tscpp://home');
+  document.getElementById('browser-url').focus();
+}
+
+function brClose() {
+  document.getElementById('browser-overlay').classList.add('hidden');
+  document.getElementById('shell').style.display = 'flex';
+  cmdInput.focus();
+}
+
+function brNavigate() {
+  const url = document.getElementById('browser-url').value.trim();
+  if (url) brNavigateTo(url);
+}
+
+function brNavigateTo(url) {
+  url = url.toLowerCase().replace(/\s+/g,'');
+  if (!url.includes('://')) url = 'tscpp://' + url;
+  document.getElementById('browser-url').value = url;
+  document.getElementById('browser-status').textContent = 'Connecting to ' + url + '...';
+
+  if (url.startsWith('dark://') && !state.tunnelActive) {
+    brRenderError('CONNECTION REFUSED', 'Dark web requires an active tunnel. Use tunnel [ip] first.');
+    return;
+  }
+  if (url.startsWith('tscpp://') && !state.hasWifi && url !== 'tscpp://home') {
+    brRenderError('NO UPLINK', 'An active network connection is required to browse TSCPP-Net.');
+    return;
+  }
+
+  const renderer = FAKE_SITES[url];
+  if (renderer) {
+    setTimeout(() => {
+      renderer();
+      document.getElementById('browser-status').textContent = url + ' — Connected';
+      document.getElementById('browser-url').className = url.startsWith('dark://') ? 'danger' : 'secure';
+      brTabs[brActiveTab] = { url, title: brPageTitle(url) };
+      brUpdateTabs();
+      if (brHistory[brHistoryIdx] !== url) {
+        brHistory = brHistory.slice(0, brHistoryIdx + 1);
+        brHistory.push(url);
+        brHistoryIdx = brHistory.length - 1;
+      }
+    }, 300);
+  } else {
+    brRenderError('404 — PAGE NOT FOUND', `'${url}' does not exist on TSCPP-Net.`);
+  }
+}
+
+function brPageTitle(url) {
+  const map = { 'tscpp://home':'Home','tscpp://store':'Software Store','tscpp://docs':'Docs',
+                'tscpp://news':'News','tscpp://network':'Network','dark://market':'Dark Market','dark://forums':'Dark Forums' };
+  return map[url] || url;
+}
+
+function brBack()    { if (brHistoryIdx > 0) { brHistoryIdx--; brNavigateTo(brHistory[brHistoryIdx]); } }
+function brForward() { if (brHistoryIdx < brHistory.length - 1) { brHistoryIdx++; brNavigateTo(brHistory[brHistoryIdx]); } }
+function brReload()  { brNavigateTo(brTabs[brActiveTab]?.url || 'tscpp://home'); }
+
+function brNewTab()  {
+  brTabs.push({ url:'tscpp://home', title:'Home' });
+  brActiveTab = brTabs.length - 1;
+  brUpdateTabs();
+  brNavigateTo('tscpp://home');
+}
+
+function brCloseTab(i) {
+  if (brTabs.length === 1) { brClose(); return; }
+  brTabs.splice(i, 1);
+  brActiveTab = Math.min(brActiveTab, brTabs.length - 1);
+  brUpdateTabs();
+  brNavigateTo(brTabs[brActiveTab].url);
+}
+
+function brUpdateTabs() {
+  const tabbar = document.getElementById('browser-tabs');
+  const newBtn = document.getElementById('browser-new-tab');
+  tabbar.innerHTML = '';
+  brTabs.forEach((t, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'br-tab' + (i === brActiveTab ? ' active' : '');
+    tab.innerHTML = `${t.title} <span class="br-tab-close" onclick="brCloseTab(${i})">✕</span>`;
+    tab.onclick = (e) => { if (!e.target.classList.contains('br-tab-close')) { brActiveTab = i; brUpdateTabs(); brNavigateTo(t.url); } };
+    tabbar.appendChild(tab);
+  });
+  tabbar.appendChild(newBtn);
+}
+
+document.getElementById('browser-url').addEventListener('keydown', e => { if (e.key === 'Enter') brNavigate(); });
+
+function brRenderError(title, msg) {
+  document.getElementById('browser-content').innerHTML =
+    `<div class="br-err">${title}</div><div class="br-err-sub">${msg}</div>`;
+  document.getElementById('browser-status').textContent = 'Error — ' + title;
+}
+
+function brLink(url, label) {
+  return `<span class="br-link" onclick="brNavigateTo('${url}')">${label}</span>`;
+}
+
+function renderHomePage() {
+  const hw = selectedHW;
+  const cpu = hw ? HW_CATALOG.cpu.find(c => c.id === hw.cpu)?.name : 'Unknown';
+  const gpu = hw ? HW_CATALOG.gpu.find(g => g.id === hw.gpu)?.name : 'Unknown';
+  const ram = hw ? HW_CATALOG.ram.find(r => r.id === hw.ram)?.name : 'Unknown';
+  document.getElementById('browser-content').innerHTML = `
+    <div class="br-page-title">TSCPP-NET</div>
+    <div class="br-page-sub">SECURE INTRANET PORTAL — AGENT ACCESS</div>
+    <div class="br-section">
+      <h3>QUICK LINKS</h3>
+      <p>${brLink('tscpp://store','» Software Store')} — Download tools and applications</p>
+      <p>${brLink('tscpp://docs','» Documentation')} — Command reference and guides</p>
+      <p>${brLink('tscpp://news','» Field Intelligence')} — Latest intercepts and bulletins</p>
+      <p>${brLink('tscpp://network','» Network Map')} — Known nodes and infrastructure</p>
+      ${state.tunnelActive ? `<p>${brLink('dark://market','» Dark Market')} — <span style="color:var(--red)">RESTRICTED</span></p>` : '<p style="color:#333">» Dark Network — <em>Requires active tunnel</em></p>'}
+    </div>
+    <div class="br-section">
+      <h3>SYSTEM PROFILE</h3>
+      <p class="br-p">CPU: ${cpu}<br>GPU: ${gpu}<br>RAM: ${ram}<br>Installed Software: ${installedSoftware.length} package(s)</p>
+    </div>
+    <div class="br-section">
+      <h3>AGENT BULLETIN</h3>
+      <p class="br-p">Intercept traffic from TSCPP_HQ. Suspected encryption upgrade in progress. High-priority targets are online. Dark market reporting new exploit kits available.</p>
+    </div>
+  `;
+}
+
+function renderStorePage() {
+  const efx = getHWEffects();
+  const items = SOFTWARE_CATALOG.filter(s => !s.darkweb);
+  let html = `<div class="br-page-title">SOFTWARE STORE</div><div class="br-page-sub">TSCPP APPROVED APPLICATIONS</div><div class="sw-grid">`;
+  items.forEach(sw => {
+    const inst = installedSoftware.includes(sw.id);
+    const blocked = sw.req === 'uplink' && !state.hasWifi;
+    html += `
+      <div class="sw-item">
+        <div class="sw-info">
+          <div class="sw-name">${sw.name}</div>
+          <div class="sw-desc">${sw.desc}</div>
+          <div class="sw-meta">Size: ${sw.size} ${sw.req ? '· Requires: ' + sw.req : ''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="sw-badge ${inst?'installed':'free'}">${inst?'INSTALLED':'FREE'}</span>
+          <button class="sw-install-btn" ${inst||blocked?'disabled':''} onclick="brInstall('${sw.id}')">
+            ${inst ? 'INSTALLED' : blocked ? 'NO UPLINK' : 'INSTALL'}
+          </button>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  document.getElementById('browser-content').innerHTML = html;
+}
+
+function renderDarkMarket() {
+  const items = SOFTWARE_CATALOG.filter(s => s.darkweb);
+  let html = `
+    <div class="br-page-title" style="color:var(--red)">DARK MARKET</div>
+    <div class="br-page-sub" style="color:#440000">UNREGULATED — ACCESS LOGGED — PROCEED WITH CAUTION</div>
+    <div class="sw-grid">`;
+  items.forEach(sw => {
+    const inst = installedSoftware.includes(sw.id);
+    html += `
+      <div class="sw-item" style="border-color:#2a0000;">
+        <div class="sw-info">
+          <div class="sw-name" style="color:var(--red)">${sw.name}</div>
+          <div class="sw-desc">${sw.desc}</div>
+          <div class="sw-meta">Size: ${sw.size} · ${sw.req ? 'Requires: ' + sw.req : ''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="sw-badge ${inst?'installed':'restricted'}">${inst?'INSTALLED':'RESTRICTED'}</span>
+          <button class="sw-install-btn" style="border-color:#440000;color:var(--red);" ${inst?'disabled':''} onclick="brInstall('${sw.id}')">
+            ${inst ? 'INSTALLED' : 'ACQUIRE'}
+          </button>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  document.getElementById('browser-content').innerHTML = html;
+}
+
+function renderDocsPage() {
+  document.getElementById('browser-content').innerHTML = `
+    <div class="br-page-title">DOCUMENTATION</div>
+    <div class="br-page-sub">TSCPP TERMINAL — AGENT REFERENCE</div>
+    <div class="br-section"><h3>GETTING STARTED</h3>
+      <p class="br-p">1. Run <strong>scan</strong> to discover nearby networks.<br>
+      2. Run <strong>hack [id]</strong> to connect to a target network.<br>
+      3. Run <strong>wifi-override</strong> to escalate privileges.<br>
+      4. Run <strong>tunnel [ip]</strong> to reach remote nodes.<br>
+      5. Run <strong>login</strong> to elevate to ROOT for advanced tools.</p>
+    </div>
+    <div class="br-section"><h3>FILESYSTEM</h3>
+      <p class="br-p">System files live in /sys and /etc. Erasing or corrupting them damages subsystems.
+      Use <strong>syshealth</strong> to diagnose. Use <strong>restore [file]</strong> to recover. Use <strong>nano [file]</strong> to edit.</p>
+    </div>
+    <div class="br-section"><h3>HARDWARE</h3>
+      <p class="br-p">Your hardware affects terminal performance. CPU tier controls command speed and thermal throttle chance.
+      RAM tier controls how many files you can maintain. GPU tier affects visual output quality.
+      Mismatched hardware causes bottlenecks — use <strong>specs</strong> to review your build and see active penalties.</p>
+    </div>
+    <div class="br-section"><h3>INSTALLED SOFTWARE</h3>
+      <p class="br-p">Software from the store enhances capabilities. Use <strong>apps</strong> in the terminal to list installed packages and their active effects.</p>
+    </div>`;
+}
+
+function renderNewsPage() {
+  const headlines = [
+    ['TSCPP_HQ UPLINK RESTORED AFTER 48-HOUR BLACKOUT', 'Intelligence sources confirm the main hub reconnected at 03:14 local time. Cause unknown.'],
+    ['NEW EXPLOIT KIT SPOTTED ON DARK MARKET', 'A zero-day targeting WPA3 handshake exchange has appeared. Patch status: unknown.'],
+    ['AGENT DELTA-9 REPORTED COMPROMISED', 'Trace risk spiked to 100% during an exfil operation. No contact in 72 hours.'],
+    ['FIREWALL BYPASS TECHNIQUE PATCHED', `CVE-2024-${rand(10000,99999)} closed across TSCPP infrastructure nodes.`],
+    ['SCPD NETWORK ACTIVITY ELEVATED', 'Unusual packet volumes detected on SCPD subnet. Avoid tunneling through those nodes.'],
+  ];
+  let html = `<div class="br-page-title">FIELD INTELLIGENCE</div><div class="br-page-sub">CLASSIFIED BULLETINS — AGENT EYES ONLY</div>`;
+  headlines.forEach(([h, b]) => {
+    html += `<div class="br-section"><h3>${h}</h3><p class="br-p">${b}</p></div>`;
+  });
+  document.getElementById('browser-content').innerHTML = html;
+}
+
+function renderNetworkPage() {
+  document.getElementById('browser-content').innerHTML = `
+    <div class="br-page-title">KNOWN NETWORK NODES</div>
+    <div class="br-page-sub">TSCPP INFRASTRUCTURE MAP</div>
+    <div class="br-section"><h3>FRIENDLY NODES</h3>
+      <p class="br-p">10.0.0.1 — LOCAL GATEWAY<br>10.0.1.5 — TSCPP RELAY-A<br>10.0.2.8 — TSCPP RELAY-B<br>10.0.9.1 — TSCPP-HQ MAIN</p>
+    </div>
+    <div class="br-section"><h3>HOSTILE NODES</h3>
+      <p class="br-p" style="color:#553333;">192.168.50.1 — SCPD FIREWALL<br>172.16.0.254 — FBI_HQ_PRIVATE GATEWAY<br>10.99.0.1 — UNKNOWN ENTITY</p>
+    </div>
+    <div class="br-section"><h3>STATUS</h3>
+      <p class="br-p">Uplink: ${state.hasWifi ? '<span style="color:var(--green)">ONLINE</span>' : '<span style="color:var(--red)">OFFLINE</span>'}<br>
+      Tunnel: ${state.tunnelActive ? '<span style="color:var(--green)">ACTIVE → ' + state.currentServer + '</span>' : '<span style="color:#555">INACTIVE</span>'}</p>
+    </div>`;
+}
+
+function renderDarkForums() {
+  document.getElementById('browser-content').innerHTML = `
+    <div class="br-page-title" style="color:var(--red)">DARK FORUMS</div>
+    <div class="br-page-sub" style="color:#440000">ANONYMOUS — ENCRYPTED — EPHEMERAL</div>
+    <div class="br-section"><h3 style="color:#553333;">[THREAD] WPA3 PMKID attack surface — 2024</h3>
+      <p class="br-p" style="color:#443333;">anon_7f3a: confirmed working against routers with non-rotated PMKIDs. standard deauth still triggers...</p></div>
+    <div class="br-section"><h3 style="color:#553333;">[THREAD] TSCPP agent list — partial</h3>
+      <p class="br-p" style="color:#443333;">ghost_null: found 3 callsigns in intercepted traffic. redacted per opsec. dm for trade...</p></div>
+    <div class="br-section"><h3 style="color:#553333;">[THREAD] New ghostkernel patch drops trace to near-zero</h3>
+      <p class="br-p" style="color:#443333;">0x_void: tested on 3 nodes. effective. available on market now...</p></div>`;
+}
+
+function brInstall(id) {
+  const sw = SOFTWARE_CATALOG.find(s => s.id === id);
+  if (!sw || installedSoftware.includes(id)) return;
+  if (sw.req === 'uplink' && !state.hasWifi) { toast('NO UPLINK — Cannot download', 'err'); return; }
+  if (sw.req === 'tunnel' && !state.tunnelActive) { toast('NO TUNNEL — Dark software requires tunnel', 'err'); return; }
+  document.getElementById('browser-status').textContent = `Downloading ${sw.name}... (${sw.size})`;
+  setTimeout(() => {
+    installedSoftware.push(id);
+    saveSoftware();
+    document.getElementById('browser-status').textContent = `${sw.name} installed successfully.`;
+    toast(`INSTALLED: ${sw.name}`, 'ok');
+    if (sw.darkweb) bumpRisk(rand(10, 20));
+    brReload();
+  }, 800 + Math.random() * 600);
+}
+
+function hasSoftware(id) { return installedSoftware.includes(id); }
+
 function toast(msg, type='ok', duration=2500) {
   const c = document.getElementById('toast-container');
   const el = document.createElement('div');
@@ -1303,7 +1985,6 @@ function toast(msg, type='ok', duration=2500) {
   }, duration);
 }
 
-// ─── THEME ───────────────────────────────────────────────────────────────────
 const THEMES = {
   green:    { label: 'GREEN PHOSPHOR (DEFAULT)', class: '' },
   amber:    { label: 'AMBER PHOSPHOR',           class: 'theme-amber' },
@@ -1316,20 +1997,17 @@ const THEMES = {
 function applyTheme(name) {
   const t = THEMES[name];
   if (!t) return false;
-  // Remove all theme classes
   Object.values(THEMES).forEach(th => { if (th.class) document.body.classList.remove(th.class); });
   if (t.class) document.body.classList.add(t.class);
   localStorage.setItem('tscpp_theme', name);
   return true;
 }
 
-// Restore theme on load
 (function() {
   const saved = localStorage.getItem('tscpp_theme');
   if (saved && THEMES[saved]) applyTheme(saved);
 })();
 
-// ─── NANO EDITOR ─────────────────────────────────────────────────────────────
 const nanoOverlay  = document.getElementById('nano-overlay');
 const nanoBody     = document.getElementById('nano-body');
 const nanoFilename = document.getElementById('nano-filename');
@@ -1370,7 +2048,6 @@ async function nanoSave() {
   nanoModified.textContent = '';
   toast(`SAVED: ${fname}`, 'ok');
 
-  // Apply system file consequences if needed
   if (isSystemFile(fname)) {
     const orig     = SYSTEM_FILES[fname] || '';
     const origKeys = orig.split('\n').map(l => l.split('=')[0].trim()).filter(Boolean);
@@ -1386,7 +2063,6 @@ async function nanoSave() {
   }
 }
 
-// Update line/col/chars display while typing
 nanoBody.addEventListener('input', () => {
   if (!nanoState.modified) {
     nanoState.modified = true;
@@ -1406,13 +2082,11 @@ function updateNanoCursor() {
 }
 
 nanoBody.addEventListener('keydown', async (e) => {
-  // Ctrl+S — save
   if (e.ctrlKey && e.key === 's') {
     e.preventDefault();
     await nanoSave();
     return;
   }
-  // Ctrl+X — exit (prompt if unsaved)
   if (e.ctrlKey && e.key === 'x') {
     e.preventDefault();
     if (nanoState.modified) {
@@ -1422,7 +2096,6 @@ nanoBody.addEventListener('keydown', async (e) => {
     nanoClose();
     return;
   }
-  // Ctrl+Z — undo (native textarea undo works, just update modified flag)
   if (e.ctrlKey && e.key === 'z') {
     setTimeout(() => {
       nanoState.modified = nanoBody.value !== nanoState.original;
@@ -1431,7 +2104,6 @@ nanoBody.addEventListener('keydown', async (e) => {
     }, 0);
     return;
   }
-  // Ctrl+R — restore original content
   if (e.ctrlKey && e.key === 'r') {
     e.preventDefault();
     const src = isSystemFile(nanoState.file) ? SYSTEM_FILES[nanoState.file] : nanoState.original;
@@ -1442,7 +2114,6 @@ nanoBody.addEventListener('keydown', async (e) => {
     toast('CONTENT RESTORED', 'warn');
     return;
   }
-  // Tab — insert 2 spaces instead of focusing away
   if (e.key === 'Tab') {
     e.preventDefault();
     const s = nanoBody.selectionStart, end = nanoBody.selectionEnd;
@@ -1452,13 +2123,11 @@ nanoBody.addEventListener('keydown', async (e) => {
   }
 });
 
-// ─── MACRO SYSTEM ────────────────────────────────────────────────────────────
 let macros      = JSON.parse(localStorage.getItem('tscpp_macros') || '{}');
-let macroRecord = null; // { name, commands[] } when recording
+let macroRecord = null;
 
 function saveMacros() { localStorage.setItem('tscpp_macros', JSON.stringify(macros)); }
 
-// ─── MP LOG ──────────────────────────────────────────────────────────────────
 function mpLog(text, cls) {
   if (!text || text.length > 80) return;
   const el = document.createElement('div');
@@ -1469,7 +2138,6 @@ function mpLog(text, cls) {
   log.scrollTop = log.scrollHeight;
 }
 
-// ─── NETWORK MAP ─────────────────────────────────────────────────────────────
 const mapNodes = [
   { id:'local', x:50,  y:60, label:'LOCAL' },
   { id:'gw',    x:105, y:30, label:'GW' },
@@ -1503,7 +2171,6 @@ function buildMap() {
   });
 }
 
-// ─── STATS UPDATER ───────────────────────────────────────────────────────────
 setInterval(() => {
   if (state.locked) return;
   document.getElementById('sb-cpu').textContent  = rand(12,88)+'%';
@@ -1516,7 +2183,6 @@ setInterval(() => {
   document.getElementById('dot-uplink').className = 'bar-dot' + (state.hasWifi ? ' active' : '');
   document.getElementById('dot-admin').className  = 'bar-dot' + (state.admin ? ' amber' : '');
   document.getElementById('dot-tunnel').className = 'bar-dot' + (state.tunnelActive ? ' active' : '');
-  // trace risk drift
   if (state.traceRisk > 0 && Math.random() < 0.1) {
     state.traceRisk = Math.max(0, state.traceRisk - 1);
     updateRisk();
@@ -1540,7 +2206,6 @@ function bumpRisk(amt) {
   }
 }
 
-// ─── FILE CONSEQUENCE ENGINE ──────────────────────────────────────────────────
 async function applyFileConsequence(filename, action) {
   const cons = FILE_CONSEQUENCES[filename];
   if (!cons || !cons[action]) return;
@@ -1552,13 +2217,11 @@ async function applyFileConsequence(filename, action) {
   print(`║ ${msg.padEnd(46)}║`, 'err');
   print('╚══════════════════════════════════════════════╝', 'err');
 
-  // Apply health effects
   if (effects) {
     effects.forEach(e => { if (e in sysHealth) sysHealth[e] = false; });
     saveSysHealth();
   }
 
-  // Severity-specific side effects
   if (severity === 'fatal' || severity === 'high') {
     bumpRisk(rand(20, 40));
     glitchScreen();
@@ -1568,7 +2231,6 @@ async function applyFileConsequence(filename, action) {
     print('!! CRITICAL SYSTEM DAMAGE — HARDWARE STRESS ELEVATED !!', 'fatal');
   }
 
-  // Immediate functional consequences
   if (filename === 'firewall.rules') {
     document.getElementById('fw-pct').textContent = severity==='erase'?'0%':'25%';
     document.getElementById('fw-fill').style.width = severity==='erase'?'0%':'25%';
@@ -1593,7 +2255,6 @@ async function applyFileConsequence(filename, action) {
 
 function isSystemFile(filename) { return filename in FILE_CONSEQUENCES; }
 
-// ─── HARDWARE FAILURE ENGINE ──────────────────────────────────────────────────
 let hwCooldown = false;
 
 const HW_ERRORS = [
@@ -1606,7 +2267,6 @@ const HW_ERRORS = [
       print('!! HARDWARE EVENT: RAM ECC FAILURE !!', 'hw');
       print(`   DIMM SLOT: ${['A1','A2','B1','B2'][rand(0,3)]} | ADDR: 0x${randHex(8)}`, 'hw');
       print(`   CORRECTABLE ERROR — BIT FLIP AT ROW ${rand(1000,9999)}`, 'hw');
-      // Corrupt a random recent output line visually
       const lines = output.querySelectorAll('.line:not(.hw):not(.err)');
       if (lines.length > 3) {
         const target = lines[lines.length - rand(1,4)];
@@ -1634,7 +2294,6 @@ const HW_ERRORS = [
       }
       if (!sysHealth.kernel) {
         await typePrint('   SECTOR UNRECOVERABLE — DATA LOSS POSSIBLE', 'err');
-        // Corrupt a random user file's content slightly
         const userFiles = Object.keys(files).filter(k=>!isSystemFile(k));
         if (userFiles.length > 0) {
           const victim = userFiles[rand(0, userFiles.length-1)];
@@ -1656,7 +2315,6 @@ const HW_ERRORS = [
       print('!! HARDWARE EVENT: CPU THERMAL THROTTLE !!', 'hw');
       print(`   TEMP: ${rand(88,99)}°C | THRESHOLD: 85°C | THROTTLING TO ${rand(40,60)}%`, 'hw');
       await typePrint('   PERFORMANCE DEGRADED — COMMANDS RUNNING SLOW...', 'hw');
-      // Slow the terminal down temporarily
       const orig = state.thermalThrottle;
       state.thermalThrottle = true;
       await sleep(rand(3000, 6000));
@@ -1669,7 +2327,7 @@ const HW_ERRORS = [
     weight: 20,
     name: 'NIC HARDWARE FAULT',
     run: async () => {
-      if (!state.hasWifi) return false; // skip if offline anyway
+      if (!state.hasWifi) return false;
       print('', '');
       print('!! HARDWARE EVENT: NIC CONTROLLER FAULT !!', 'hw');
       print(`   INTERFACE: eth0 | DRIVER: tscpp_nic | IRQ: ${rand(16,32)}`, 'hw');
@@ -1708,7 +2366,7 @@ const HW_ERRORS = [
   },
   {
     id: 'kernel_panic',
-    weight: 5, // rare
+    weight: 5,
     name: 'KERNEL PANIC',
     run: async () => {
       await kernelPanic();
@@ -1760,7 +2418,6 @@ async function kernelPanic() {
   note.textContent = 'SYSTEM WILL REBOOT IN 5 SECONDS...';
   overlay.appendChild(note);
 
-  // Animate progress bar
   await sleep(100);
   barFill.style.width = '100%';
   await sleep(5200);
@@ -1776,20 +2433,17 @@ async function maybeHardwareError() {
   if (Math.random() > chance) return;
 
   hwCooldown = true;
-  setTimeout(() => hwCooldown = false, 8000); // 8s cooldown between hw events
+  setTimeout(() => hwCooldown = false, 8000);
 
-  // Weighted random selection
   const pool = [];
   HW_ERRORS.forEach(e => { for(let i=0;i<e.weight;i++) pool.push(e); });
   const chosen = pool[rand(0, pool.length-1)];
 
-  await sleep(rand(200, 800)); // slight delay before event fires
+  await sleep(rand(200, 800));
   const result = await chosen.run();
-  // If run() returned false, it skipped — no cooldown needed
   if (result === false) hwCooldown = false;
 }
 
-// Periodic instability effects (only when system files are missing)
 setInterval(async () => {
   if (state.locked) return;
   if (!sysHealth.firewall && Math.random() < 0.3) {
@@ -1803,7 +2457,6 @@ setInterval(async () => {
   }
 }, 5000);
 
-// ─── CLOCK ───────────────────────────────────────────────────────────────────
 setInterval(() => {
   if (!state.locked) {
     const now = new Date();
@@ -1813,20 +2466,18 @@ setInterval(() => {
   }
 }, 1000);
 
-// ─── AUTOCOMPLETE ─────────────────────────────────────────────────────────────
 cmdInput.addEventListener('input', () => {
   const val = cmdInput.value;
   if (!val) { acHint.textContent = ''; return; }
   const parts = val.split(/\s+/);
 
-  // If typing a command (first word only)
   if (parts.length === 1) {
     const match = COMMANDS.find(c => c.startsWith(val) && c !== val);
     acHint.textContent = match ? match.slice(val.length) : '';
     return;
   }
 
-  // If typing a second argument that looks like a file/path — suggest from cwd + full paths
+ 
   const fileCmds = ['cat','nano','write','erase','rename','grep','diff','chmod','zip','download','exfil','restore','find'];
   const dirCmds  = ['cd','ls','mkdir','rmdir'];
   const lastArg  = parts[parts.length - 1];
@@ -1877,7 +2528,6 @@ cmdInput.addEventListener('keydown', async (e) => {
   }
 });
 
-// Lock screen input
 document.getElementById('lock-input').addEventListener('keydown', async e => {
   if (e.key === 'Enter') {
     const val = document.getElementById('lock-input').value.trim();
@@ -1892,24 +2542,22 @@ document.getElementById('lock-input').addEventListener('keydown', async e => {
   }
 });
 
-// ─── BOOT ────────────────────────────────────────────────────────────────────
 async function bootSequence() {
   state.locked = false;
   document.getElementById('lockscreen').className = 'hidden';
   output.innerHTML = '';
   buildMap();
 
-  // Restore sidebar/minimap panel visibility from saved state
+ 
   if (!state.sidebarOpen) document.getElementById('sidebar').className = 'collapsed';
   if (!state.minimapOpen) document.getElementById('minimap-panel').className = 'hidden';
 
-  // Restore progress bars
   if (!sysHealth.firewall) { document.getElementById('fw-pct').textContent='0%'; document.getElementById('fw-fill').style.width='0%'; }
   if (!sysHealth.encryption) { document.getElementById('enc-pct').textContent='0%'; document.getElementById('enc-fill').style.width='0%'; }
   updateRisk();
 
   const lines = [
-    ['>> TSCPP BIOS v7.0 — INITIALIZING...','sys'],
+    ['>> TSCPP BIOS v8.0 — INITIALIZING...','sys'],
     ['>> CPU CHECK........ [ 8-CORE / 4.2GHz ]  [ OK ]','sys'],
     ['>> RAM CHECK........ [ 32GB DDR5 ECC ]     [ OK ]','sys'],
     ['>> DISK CHECK....... [ 2TB NVME RAID-1 ]   [ OK ]','sys'],
@@ -1931,7 +2579,6 @@ async function bootSequence() {
     await sleep(30);
   }
 
-  // Warn if any system files are already damaged
   const damaged = getInstability();
   if (damaged > 0) {
     await sleep(200);
@@ -1945,11 +2592,10 @@ async function bootSequence() {
   updatePrompt();
 }
 
-// ─── PROMPT ──────────────────────────────────────────────────────────────────
 function updatePrompt() {
   const user    = state.admin ? 'ROOT' : 'AGENT';
   const sym     = state.admin ? ':#'   : ':~$';
-  // Show a shortened cwd — replace /home/agent with ~
+ 
   const short   = state.cwd.replace('/home/agent', '~').replace('/home/agent', '~') || '/';
   promptSpan.textContent = `${user}@${state.currentServer} ${short}${sym}`;
   promptSpan.className   = state.admin ? 'root' : '';
@@ -1967,7 +2613,6 @@ function updatePrompt() {
   saveState();
 }
 
-// ─── SIDEBAR / TAB HELPERS ───────────────────────────────────────────────────
 function sidebarNav(target) {
   if (target === 'SCAN') processCommand('scan');
 }
@@ -2001,11 +2646,9 @@ function closeTab(e, id) {
   if (state.activeTab === id) switchTab(0);
 }
 
-// ─── PROCESS COMMAND ─────────────────────────────────────────────────────────
 async function processCommand(raw) {
   if (state.locked) return;
 
-  // password prompt handler
   if (state.waitingPw) {
     state.waitingPw = false;
     if (raw === _activeKeys.root) {
@@ -2019,7 +2662,6 @@ async function processCommand(raw) {
     return;
   }
 
-  // generic input prompt handler
   if (state.waitingInput) {
     const { resolve } = state.waitingInput;
     state.waitingInput = null;
@@ -2030,25 +2672,21 @@ async function processCommand(raw) {
   const args = raw.split(/\s+/);
   const cmd  = args[0].toLowerCase();
 
-  // If recording a macro, capture this command (skip macro commands themselves)
   if (macroRecord && cmd !== 'macro') {
     macroRecord.commands.push(raw);
     toast(`REC [${macroRecord.commands.length}]: ${raw.substring(0,24)}`, 'warn', 1200);
   }
 
-  // echo the command
   const user = state.admin ? 'ROOT' : 'AGENT';
   const sym  = state.admin ? ':#' : ':~$';
   print(`${user}@${state.currentServer}${sym} ${raw}`, 'cmd-echo');
 
-  // ── COMMANDS ────────────────────────────────────────────────────────────
   switch(cmd) {
 
-    // ── HELP ──────────────────────────────────────────────────────────────
     case 'help': {
       if (args[1]) { printUsage(args[1]); break; }
       printSep();
-      await typePrint('TSCPP TERMINAL v7.0 — COMMAND REFERENCE', 'sys', 6);
+      await typePrint('TSCPP TERMINAL v8.0 — COMMAND REFERENCE', 'sys', 6);
       print('  TIP: Type "help [command]" or "man [command]" for detailed usage.', 'dim');
       printSep();
       const groups = [
@@ -2063,7 +2701,6 @@ async function processCommand(raw) {
       for (const [grp, cmds] of groups) {
         print('', '');
         print(`  [ ${grp} ]`, 'admin');
-        // Show name + first-line desc for each
         cmds.forEach(c => {
           const key = c.split(' ')[0];
           const desc = CMD_HELP[key]?.desc || '';
@@ -2074,10 +2711,8 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── CLEAR ─────────────────────────────────────────────────────────────
     case 'clear': output.innerHTML = ''; break;
 
-    // ── PANIC ─────────────────────────────────────────────────────────────
     case 'panic':
       output.innerHTML = '';
       state.traceRisk = 0;
@@ -2088,36 +2723,30 @@ async function processCommand(raw) {
       await typePrint('!! PANIC TRIGGERED — ALL CONNECTIONS SEVERED — LOGS PURGED !!', 'err');
       break;
 
-    // ── REBOOT ────────────────────────────────────────────────────────────
     case 'reboot':
       await typePrint('REBOOTING...', 'sys');
       await sleep(800);
       window.location.reload();
       break;
 
-    // ── ECHO ──────────────────────────────────────────────────────────────
     case 'echo':
       print(args.slice(1).join(' '));
       break;
 
-    // ── DATE ──────────────────────────────────────────────────────────────
     case 'date':
       print(new Date().toString(), 'sys');
       break;
 
-    // ── UPTIME ────────────────────────────────────────────────────────────
     case 'uptime': {
       const s = Math.floor(performance.now()/1000);
       print(`UPTIME: ${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`, 'sys');
       break;
     }
 
-    // ── HISTORY ───────────────────────────────────────────────────────────
     case 'history':
       cmdHistory.forEach((c,i) => print(`  ${String(i+1).padStart(3,'0')}  ${c}`));
       break;
 
-    // ── ENV ───────────────────────────────────────────────────────────────
     case 'env':
       print(`SHELL=TSCPP_SH`, 'sys');
       print(`USER=${state.admin?'root':'agent'}`, 'sys');
@@ -2127,13 +2756,11 @@ async function processCommand(raw) {
       print(`PATH=/bin:/usr/bin:/usr/local/tscpp/bin`, 'sys');
       break;
 
-    // ── ALIAS ─────────────────────────────────────────────────────────────
     case 'alias':
       if (args.length < 3) { print('USAGE: alias [name] [command]', 'err'); break; }
       print(`ALIAS '${args[1]}' -> '${args.slice(2).join(' ')}' REGISTERED.`, 'sys');
       break;
 
-    // ── LOGIN ─────────────────────────────────────────────────────────────
     case 'login':
       if (state.admin) { print('ALREADY ROOT.', 'warn'); break; }
       state.waitingPw = true;
@@ -2142,18 +2769,15 @@ async function processCommand(raw) {
       cmdInput.addEventListener('keydown', function handler(e) {
         if (e.key === 'Enter') { cmdInput.type = 'text'; cmdInput.removeEventListener('keydown', handler); }
       }, {once: false});
-      // handle pw with a one-shot override
       cmdInput.type = 'password';
       break;
 
-    // ── LOGOUT ────────────────────────────────────────────────────────────
     case 'logout':
       if (!state.admin) { print('NOT IN ADMIN SESSION.', 'err'); break; }
       state.admin = false; updatePrompt();
       await typePrint('ADMIN SESSION TERMINATED.', 'sys');
       break;
 
-    // ── PASSWD ────────────────────────────────────────────────────────────
     case 'passwd': {
       const target = (args[1] || 'lock').toLowerCase();
       if (target !== 'lock' && target !== 'root') {
@@ -2167,7 +2791,6 @@ async function processCommand(raw) {
 
       await typePrint(`CHANGING ${isRoot ? 'ROOT' : 'LOCK SCREEN'} KEY`, 'sys');
 
-      // Verify current password first
       await typePrint('Enter current key to confirm identity:', 'warn');
       const current = await new Promise(res => {
         state.waitingInput = { resolve: res };
@@ -2223,12 +2846,10 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── WHOAMI ────────────────────────────────────────────────────────────
     case 'whoami':
       print(`UID: ${state.admin?'0 (ROOT)':'1001 (AGENT)'} | GID: ${state.admin?'0':'1001'} | NODE: ${state.currentServer}`, 'sys');
       break;
 
-    // ── STATUS ────────────────────────────────────────────────────────────
     case 'status':
       printSep();
       print(`  NODE       : ${state.currentServer}`);
@@ -2241,20 +2862,26 @@ async function processCommand(raw) {
       printSep();
       break;
 
-    // ── SCAN ──────────────────────────────────────────────────────────────
     case 'scan':
       await typePrint('SCANNING RF SPECTRUM...', 'sys');
       for (let i = 0; i < 5; i++) { await sleep(120); print(`  >> PROBING CHANNEL ${rand(1,165)}...`, 'dim'); }
       await typePrint('SCAN COMPLETE — 7 NETWORKS FOUND', 'success');
       printSep();
-      printTable(
-        ['ID','SSID','SIGNAL','ENC','CH','MAC'],
-        scannedNetworks.map(n=>[n.id,n.ssid,n.signal,n.enc,n.chan.toString(),n.mac])
-      );
+      if (hasSoftware('net-scanner')) {
+        printTable(
+          ['ID','SSID','SIGNAL','ENC','CH','MAC','CLIENTS','WPS'],
+          scannedNetworks.map(n=>[n.id,n.ssid,n.signal,n.enc,n.chan.toString(),n.mac,rand(0,12).toString(),Math.random()<0.4?'YES':'NO'])
+        );
+        print('  [net-scanner] Hidden SSID detection active.', 'success');
+      } else {
+        printTable(
+          ['ID','SSID','SIGNAL','ENC','CH','MAC'],
+          scannedNetworks.map(n=>[n.id,n.ssid,n.signal,n.enc,n.chan.toString(),n.mac])
+        );
+      }
       printSep();
       break;
 
-    // ── HACK ──────────────────────────────────────────────────────────────
     case 'hack': {
       if (!args[1]) { print('USAGE: hack [ID]', 'err'); break; }
       const net = scannedNetworks.find(n=>n.id===args[1].padStart(2,'0'));
@@ -2275,7 +2902,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── WIFI-OVERRIDE ─────────────────────────────────────────────────────
     case 'wifi-override':
       if (!state.hasWifi) { print('ERR: NO CONNECTION.', 'err'); break; }
       await typePrint('ESCALATING PRIVILEGES...', 'sys');
@@ -2285,7 +2911,6 @@ async function processCommand(raw) {
       await typePrint('WIFI-ADMIN: TRUE — PACKET INJECTION ENABLED.', 'admin');
       break;
 
-    // ── TUNNEL ────────────────────────────────────────────────────────────
     case 'tunnel':
       if (!state.wifiAdmin) { print('ERR: REQUIRES WIFI-OVERRIDE.', 'err'); break; }
       if (!args[1]) { print('USAGE: tunnel [IP]', 'err'); break; }
@@ -2299,7 +2924,6 @@ async function processCommand(raw) {
       document.getElementById('mn-ext1').classList.add('active');
       break;
 
-    // ── PING ──────────────────────────────────────────────────────────────
     case 'ping': {
       const host = args[1] || '8.8.8.8';
       await typePrint(`PING ${host}`, 'sys');
@@ -2312,7 +2936,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── TRACE ─────────────────────────────────────────────────────────────
     case 'trace': {
       const host = args[1] || '10.0.0.1';
       await typePrint(`TRACEROUTE TO ${host}`, 'sys');
@@ -2325,7 +2948,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── NETSTAT ───────────────────────────────────────────────────────────
     case 'netstat':
       await typePrint('ACTIVE CONNECTIONS:', 'sys');
       printTable(
@@ -2339,7 +2961,6 @@ async function processCommand(raw) {
       );
       break;
 
-    // ── PORTMAP ───────────────────────────────────────────────────────────
     case 'portmap': {
       const target = args[1] || state.currentServer;
       await typePrint(`PORT SCAN: ${target}`, 'sys');
@@ -2348,7 +2969,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── NMAP ──────────────────────────────────────────────────────────────
     case 'nmap': {
       if (!state.hasWifi) { print('ERR: NO UPLINK.', 'err'); break; }
       const ip = args[1] || randIP();
@@ -2362,7 +2982,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── SNIFF ─────────────────────────────────────────────────────────────
     case 'sniff':
       if (!state.hasWifi) { print('ERR: NO UPLINK.', 'err'); break; }
       await typePrint('PACKET CAPTURE (5 PACKETS):', 'sys');
@@ -2373,7 +2992,6 @@ async function processCommand(raw) {
       bumpRisk(rand(5,10));
       break;
 
-    // ── ARP ───────────────────────────────────────────────────────────────
     case 'arp':
       await typePrint('ARP TABLE:', 'sys');
       printTable(
@@ -2382,7 +3000,6 @@ async function processCommand(raw) {
       );
       break;
 
-    // ── SPOOF ─────────────────────────────────────────────────────────────
     case 'spoof':
       if (!state.wifiAdmin) { print('ERR: REQUIRES WIFI-OVERRIDE.', 'err'); break; }
       if (!args[1]) { print('USAGE: spoof [IP]', 'err'); break; }
@@ -2392,7 +3009,6 @@ async function processCommand(raw) {
       await typePrint(`MAC RANDOMIZED — ARP POISONING SENT — NOW APPEARING AS ${args[1]}`, 'admin');
       break;
 
-    // ── BRUTEFORCE ────────────────────────────────────────────────────────
     case 'bruteforce': {
       if (!state.hasWifi) { print('ERR: NO UPLINK.', 'err'); break; }
       const target = args[1] || 'TARGET';
@@ -2407,7 +3023,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── INJECT ────────────────────────────────────────────────────────────
     case 'inject':
       if (!state.wifiAdmin) { print('ERR: REQUIRES WIFI-OVERRIDE.', 'err'); break; }
       await typePrint(`PAYLOAD INJECTION -> ${args[1]||'BROADCAST'}`, 'sys');
@@ -2416,7 +3031,6 @@ async function processCommand(raw) {
       await typePrint('PAYLOAD DELIVERED — SHELLCODE EXECUTING.', 'admin');
       break;
 
-    // ── KEYLOG ────────────────────────────────────────────────────────────
     case 'keylog':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (args[1]==='start') {
@@ -2427,7 +3041,6 @@ async function processCommand(raw) {
       } else { print('USAGE: keylog [start|stop]', 'err'); }
       break;
 
-    // ── CRACK ─────────────────────────────────────────────────────────────
     case 'crack': {
       if (!args[1]) { print('USAGE: crack [hash]', 'err'); break; }
       await typePrint(`CRACKING: ${args[1]}`, 'sys');
@@ -2437,7 +3050,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── DECRYPT ───────────────────────────────────────────────────────────
     case 'decrypt':
       if (!args[1]) { print('USAGE: decrypt [text]', 'err'); break; }
       await typePrint('RUNNING DECRYPTION SUITE...', 'sys');
@@ -2445,7 +3057,6 @@ async function processCommand(raw) {
       print(`PLAINTEXT: ${atob(args[1].replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(args[1].length/4)*4,'=')) || '[DECRYPTION FAILED — INVALID KEY]'}`, 'success');
       break;
 
-    // ── EXFIL ─────────────────────────────────────────────────────────────
     case 'exfil':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (!args[1] || !files[args[1]]) { print('ERR: FILE NOT FOUND.', 'err'); break; }
@@ -2455,7 +3066,6 @@ async function processCommand(raw) {
       await typePrint(`SUCCESS — ${files[args[1]].length} BYTES SENT TO ${randIP()}`, 'admin');
       break;
 
-    // ── FIREWALL ──────────────────────────────────────────────────────────
     case 'firewall': {
       const on = args[1]==='on';
       const fw = document.getElementById('fw-fill');
@@ -2466,41 +3076,41 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── VPN ───────────────────────────────────────────────────────────────
     case 'vpn':
       if (args[1]==='on') {
         const vpnIP = randIP();
-        state.traceRisk = Math.max(0, state.traceRisk - 20);
+        const vReduce = hasSoftware('stealth-vpn') ? 35 : 20;
+        state.traceRisk = Math.max(0, state.traceRisk - vReduce);
         updateRisk();
-        await typePrint(`VPN CONNECTED — NEW IP: ${vpnIP} — TRACE RISK REDUCED.`, 'success');
+        await typePrint(`VPN CONNECTED — NEW IP: ${vpnIP} — TRACE RISK -${vReduce}${hasSoftware('stealth-vpn')?' (StealthVPN Pro)':''}.`, 'success');
       } else if (args[1]==='off') {
         await typePrint('VPN DISCONNECTED.', 'warn');
         bumpRisk(15);
       } else { print('USAGE: vpn [on|off]', 'err'); }
       break;
 
-    // ── PROXY ─────────────────────────────────────────────────────────────
     case 'proxy':
       if (!args[1]) { print('USAGE: proxy [ip]', 'err'); break; }
       await typePrint(`ROUTING THROUGH PROXY ${args[1]}...`, 'sys');
       await sleep(200);
-      bumpRisk(-10); updateRisk();
-      await typePrint(`PROXY CHAIN ESTABLISHED — ANONYMIZED.`, 'success');
+      {
+        const pReduce = hasSoftware('proxy-chain') ? 25 : 10;
+        state.traceRisk = Math.max(0, state.traceRisk - pReduce);
+        updateRisk();
+        await typePrint(`PROXY${hasSoftware('proxy-chain')?' CHAIN (×3)':''} ESTABLISHED — ANONYMIZED. TRACE -${pReduce}.`, 'success');
+      }
       break;
 
-    // ── LS ────────────────────────────────────────────────────────────────
     case 'ls': {
       const targetDir = args[1] ? normPath(args[1]) : state.cwd;
       if (!dirs.includes(targetDir)) { print(`ERR: '${targetDir}' is not a directory.`, 'err'); break; }
       if (!canRead(targetDir)) { print(`ERR: Permission denied — '${targetDir}' requires ROOT.`, 'err'); break; }
 
-      // Sub-directories inside targetDir
       const subDirs = dirs.filter(d => {
         if (d === targetDir) return false;
         const parent = d.includes('/') ? d.substring(0, d.lastIndexOf('/')) || '/' : '/';
         return parent === targetDir;
       });
-      // Files in this dir
       const localFiles = filesInDir(targetDir);
 
       print('', '');
@@ -2526,13 +3136,11 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── CAT ───────────────────────────────────────────────────────────────
     case 'cat': {
       if (!args[1]) { printUsage('cat'); break; }
       const { name: catName, dir: catDir } = resolveFile(args[1]);
       if (!dirs.includes(catDir) || !canRead(catDir)) { print(`ERR: Permission denied — cannot read '${catDir}'.`, 'err'); break; }
       if (isSystemFile(catName) && catDir !== '/sys' && catDir !== '/etc' && catDir !== '/var/log') {
-        // allow reading system files from their actual location
       }
       const isSysCat = isSystemFile(catName);
       if (isSysCat && !state.admin && DIR_PERMS[catDir]?.r === 'root') {
@@ -2547,7 +3155,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── WRITE ─────────────────────────────────────────────────────────────
     case 'write': {
       if (args.length < 3) { printUsage('write'); break; }
       const { name: wName, dir: wDir } = resolveFile(args[1]);
@@ -2576,7 +3183,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── ERASE ─────────────────────────────────────────────────────────────
     case 'erase': {
       if (!args[1]) { printUsage('erase'); break; }
       const { name: eName, dir: eDir } = resolveFile(args[1]);
@@ -2605,7 +3211,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── RENAME ────────────────────────────────────────────────────────────
     case 'rename': {
       if (args.length < 3) { printUsage('rename'); break; }
       const { name: rOld, dir: rDir } = resolveFile(args[1]);
@@ -2624,7 +3229,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── FIND ──────────────────────────────────────────────────────────────
     case 'find': {
       if (!args[1]) { printUsage('find'); break; }
       const term = args[1];
@@ -2641,7 +3245,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── GREP ──────────────────────────────────────────────────────────────
     case 'grep': {
       if (args.length < 3) { printUsage('grep'); break; }
       const gTerm = args[1];
@@ -2664,12 +3267,10 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── PWD ───────────────────────────────────────────────────────────────
     case 'pwd':
       print(state.cwd, 'sys');
       break;
 
-    // ── CD ────────────────────────────────────────────────────────────────
     case 'cd': {
       const target = args[1] ? normPath(args[1]) : '/home/agent';
       if (!dirs.includes(target)) { print(`ERR: cd: '${target}': No such directory.`, 'err'); break; }
@@ -2679,7 +3280,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── MKDIR ─────────────────────────────────────────────────────────────
     case 'mkdir': {
       if (!args[1]) { printUsage('mkdir'); break; }
       const mkPath = normPath(args[1]);
@@ -2694,7 +3294,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── RMDIR ─────────────────────────────────────────────────────────────
     case 'rmdir': {
       if (!args[1]) { printUsage('rmdir'); break; }
       const rmPath = normPath(args[1]);
@@ -2710,7 +3309,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── MAN ───────────────────────────────────────────────────────────────
     case 'man':
       if (!args[1]) {
         print('USAGE: man [command]', 'err');
@@ -2720,7 +3318,6 @@ async function processCommand(raw) {
       printUsage(args[1]);
       break;
 
-    // ── DIFF ──────────────────────────────────────────────────────────────
     case 'diff':
       if (args.length < 3) { print('USAGE: diff [file1] [file2]', 'err'); break; }
       if (!files[args[1]] || !files[args[2]]) { print('ERR: FILE(S) NOT FOUND.', 'err'); break; }
@@ -2729,7 +3326,6 @@ async function processCommand(raw) {
       print(files[args[1]] === files[args[2]] ? '(files identical)' : `< ${files[args[1]]}\n> ${files[args[2]]}`, 'sys');
       break;
 
-    // ── CHMOD ─────────────────────────────────────────────────────────────
     case 'chmod':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (args.length < 3) { print('USAGE: chmod [file] [perms]', 'err'); break; }
@@ -2737,7 +3333,6 @@ async function processCommand(raw) {
       await typePrint(`PERMISSIONS SET: ${args[1]} -> ${args[2]}`, 'admin');
       break;
 
-    // ── ZIP / UNZIP ───────────────────────────────────────────────────────
     case 'zip':
       if (!args[1] || !files[args[1]]) { print('USAGE: zip [file]', 'err'); break; }
       await typePrint(`COMPRESSING ${args[1]} -> ${args[1]}.gz (${Math.round(files[args[1]].length*0.6)} bytes)`, 'sys');
@@ -2747,7 +3342,6 @@ async function processCommand(raw) {
       await typePrint(`EXTRACTING ${args[1]}...`, 'sys');
       break;
 
-    // ── DOWNLOAD ──────────────────────────────────────────────────────────
     case 'download':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (!args[1] || !files[args[1]]) { print('ERR: FILE NOT FOUND.', 'err'); break; }
@@ -2762,7 +3356,6 @@ async function processCommand(raw) {
       }
       break;
 
-    // ── LOCATE ────────────────────────────────────────────────────────────
     case 'locate':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       await typePrint('TRIANGULATING GPS SIGNAL...', 'sys');
@@ -2772,7 +3365,6 @@ async function processCommand(raw) {
       bumpRisk(rand(5,10));
       break;
 
-    // ── PS ────────────────────────────────────────────────────────────────
     case 'ps':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       printTable(
@@ -2786,14 +3378,12 @@ async function processCommand(raw) {
       );
       break;
 
-    // ── KILL ──────────────────────────────────────────────────────────────
     case 'kill':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (!args[1]) { print('USAGE: kill [pid]', 'err'); break; }
       await typePrint(`PROCESS ${args[1]} TERMINATED.`, 'admin');
       break;
 
-    // ── SYSINFO ───────────────────────────────────────────────────────────
     case 'sysinfo':
       printSep();
       print(`  OS       : TSCPP-OS 5.0 (based on Debian 12)`, 'sys');
@@ -2806,7 +3396,6 @@ async function processCommand(raw) {
       printSep();
       break;
 
-    // ── ENCODE / DECODE ───────────────────────────────────────────────────
     case 'encode':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (!args[1]) { print('USAGE: encode [text]', 'err'); break; }
@@ -2820,7 +3409,6 @@ async function processCommand(raw) {
       catch(e) { print('ERR: INVALID BASE64.', 'err'); }
       break;
 
-    // ── MATRIX ────────────────────────────────────────────────────────────
     case 'matrix':
       if (!state.hasWifi) { print('ERR: UPLINK REQUIRED.', 'err'); break; }
       output.innerHTML = '';
@@ -2830,7 +3418,6 @@ async function processCommand(raw) {
       }
       break;
 
-    // ── CONNECT ───────────────────────────────────────────────────────────
     case 'connect':
       if (args[1]==='tscpp' && args[2]==='main') {
         window.open("https://nucleargod12444.github.io/TSCPP/index.html?source=fbi_hq", "_blank");
@@ -2838,7 +3425,6 @@ async function processCommand(raw) {
       } else { print('USAGE: connect tscpp main', 'err'); }
       break;
 
-    // ── NANO ──────────────────────────────────────────────────────────────
     case 'nano': {
       if (!args[1]) { printUsage('nano'); break; }
       const { name: nanoName, dir: nanoDir } = resolveFile(args[1]);
@@ -2852,7 +3438,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── THEME ─────────────────────────────────────────────────────────────
     case 'theme': {
       if (!args[1]) {
         printSep();
@@ -2872,7 +3457,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── MACRO ─────────────────────────────────────────────────────────────
     case 'macro': {
       const sub = (args[1] || '').toLowerCase();
 
@@ -2934,7 +3518,75 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── SIDEBAR / MINIMAP TOGGLES ──────────────────────────────────────────
+    case 'browser': {
+      if (!state.hasWifi) { print('ERR: No uplink — browser requires a network connection.', 'err'); print('Run scan → hack [id] to get online first.', 'dim'); break; }
+      await typePrint('LAUNCHING TSCPP BROWSER...', 'sys');
+      await sleep(300);
+      brOpen(args[1] || 'tscpp://home');
+      break;
+    }
+
+    case 'specs': {
+      if (!selectedHW) { print('ERR: No hardware configured. Run os-reinstall to set up hardware.', 'err'); break; }
+      const scpu = HW_CATALOG.cpu.find(c => c.id === selectedHW.cpu);
+      const sgpu = HW_CATALOG.gpu.find(g => g.id === selectedHW.gpu);
+      const sram = HW_CATALOG.ram.find(r => r.id === selectedHW.ram);
+      const efx  = getHWEffects();
+      const bns  = detectBottlenecks(scpu, sgpu, sram);
+      printSep();
+      await typePrint('SYSTEM SPECIFICATIONS', 'sys', 6);
+      printSep();
+      print(`  CPU  : ${scpu?.name || '?'} — ${scpu?.cores} @ ${scpu?.clock} — TDP ${scpu?.tdp}W`, 'sys');
+      print(`  GPU  : ${sgpu?.name || '?'} — ${sgpu?.vram} — TDP ${sgpu?.tdp}W`, 'sys');
+      print(`  RAM  : ${sram?.name || '?'} — ${sram?.kit} @ ${sram?.speed}`, 'sys');
+      print('', '');
+      print('  PERFORMANCE EFFECTS:', 'admin');
+      print(`    CMD SPEED MULT   : ${efx.speedMult < 1 ? 'FASTER (×'+efx.speedMult.toFixed(2)+')' : 'SLOWER (×'+efx.speedMult.toFixed(2)+')'}`, efx.speedMult > 1.1 ? 'err' : 'sys');
+      print(`    THERMAL RISK     : ${(efx.thermalChance*100).toFixed(0)}% per command`, efx.thermalChance > 0.06 ? 'warn' : 'sys');
+      print(`    MAX FILES        : ${efx.maxFiles === 999 ? 'Unlimited' : efx.maxFiles}`, efx.ramWarn ? 'warn' : 'sys');
+      print(`    GPU VISUAL TIER  : ${efx.gpuTier}/6`, 'sys');
+      if (hasSoftware('ram-optim'))    print(`    RAM-OPTIMIZER    : ACTIVE — bottleneck reduced`, 'success');
+      if (hasSoftware('heat-daemon'))  print(`    THERMAL DAEMON   : ACTIVE — throttle suppressed`, 'success');
+      print('', '');
+      if (bns.length > 0) {
+        print('  BOTTLENECKS DETECTED:', 'err');
+        bns.forEach(b => print('    !! ' + b.replace(/<[^>]+>/g,''), 'warn'));
+      } else {
+        print('  NO BOTTLENECKS — SYSTEM BALANCED', 'success');
+      }
+      printSep();
+      break;
+    }
+
+    case 'apps': {
+      printSep();
+      await typePrint('INSTALLED SOFTWARE', 'sys', 6);
+      printSep();
+      if (installedSoftware.length === 0) {
+        print('  No software installed.', 'dim');
+        print('  Open the browser and visit tscpp://store to download apps.', 'dim');
+        break;
+      }
+      installedSoftware.forEach(id => {
+        const sw = SOFTWARE_CATALOG.find(s => s.id === id);
+        if (!sw) return;
+        print(`  ${sw.name.padEnd(28)} ${sw.desc.substring(0,55)}...`, sw.darkweb ? 'warn' : 'sys');
+      });
+      printSep();
+      print('  Active effects:', 'dim');
+      if (hasSoftware('crack-suite'))  print('    crack-suite   : Crack success rate boosted', 'success');
+      if (hasSoftware('stealth-vpn'))  print('    stealth-vpn   : VPN reduces trace risk by 35', 'success');
+      if (hasSoftware('proxy-chain'))  print('    proxy-chain   : Proxy reduces trace risk by 25', 'success');
+      if (hasSoftware('nmap-elite'))   print('    nmap-elite    : NMAP shows extra CVEs and OS info', 'success');
+      if (hasSoftware('net-scanner'))  print('    net-scanner   : Scan reveals hidden SSIDs + clients', 'success');
+      if (hasSoftware('ram-optim'))    print('    ram-optim     : RAM bottleneck penalty halved', 'success');
+      if (hasSoftware('heat-daemon'))  print('    heat-daemon   : Thermal throttle chance halved', 'success');
+      if (hasSoftware('bruteX'))       print('    bruteX        : Bruteforce finds credentials faster', 'success');
+      if (hasSoftware('ghost-kernel')) print('    ghost-kernel  : Trace risk decays 2× faster', 'success');
+      printSep();
+      break;
+    }
+
     case 'sidebar':
       state.sidebarOpen = !state.sidebarOpen;
       document.getElementById('sidebar').className = state.sidebarOpen ? '' : 'collapsed';
@@ -2947,7 +3599,6 @@ async function processCommand(raw) {
       print(`MINIMAP: ${state.minimapOpen?'VISIBLE':'HIDDEN'}`, 'sys');
       break;
 
-    // ── SYSHEALTH ─────────────────────────────────────────────────────────
     case 'syshealth': {
       printSep();
       await typePrint('SYSTEM HEALTH DIAGNOSTIC', 'sys', 6);
@@ -2973,7 +3624,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── OS REINSTALL ──────────────────────────────────────────────────────
     case 'os-reinstall': {
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       print('', '');
@@ -3030,7 +3680,6 @@ async function processCommand(raw) {
         await sleep(delay);
       }
 
-      // Wipe everything
       localStorage.removeItem('tscpp_files');
       localStorage.removeItem('tscpp_health');
       localStorage.removeItem('tscpp_state');
@@ -3042,10 +3691,9 @@ async function processCommand(raw) {
       localStorage.removeItem('tscpp_master_key');
       localStorage.removeItem('tscpp_root_key');
 
-      // Reset to factory
       Object.keys(files).forEach(k => delete files[k]);
       Object.assign(files, {
-        "welcome.txt": "TSCPP Terminal v7.0 — Connection required for cloud sync.",
+        "welcome.txt": "TSCPP Terminal v8.0 — Connection required for cloud sync.",
         "note.txt":    "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
         "readme.md":   "Welcome agent. Type HELP for command reference.",
       }, SYSTEM_FILES);
@@ -3054,7 +3702,6 @@ async function processCommand(raw) {
       Object.keys(sysHealth).forEach(k => sysHealth[k] = true);
       saveSysHealth();
 
-      // Reset runtime state
       state.hasWifi = false; state.wifiAdmin = false; state.tunnelActive = false;
       state.admin = false; state.traceRisk = 0; state.currentServer = 'LOCAL';
       state.thermalThrottle = false;
@@ -3079,7 +3726,6 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── RESTORE ───────────────────────────────────────────────────────────
     case 'restore': {
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (!args[1]) { print('USAGE: restore [file]', 'err'); break; }
@@ -3097,13 +3743,11 @@ async function processCommand(raw) {
       break;
     }
 
-    // ── DEFAULT ───────────────────────────────────────────────────────────
     default:
       print(`ERR: '${cmd}' UNRECOGNIZED. TYPE 'HELP' FOR COMMANDS.`, 'err');
       bumpRisk(1);
   }
 
-  // ── HARDWARE FAILURE CHECK — fires after most commands ─────────────────
   const safeFromHW = ['help','clear','history','status','whoami','date','uptime','env','sidebar','minimap','syshealth','restore'];
   if (!safeFromHW.includes(cmd)) {
     if (state.thermalThrottle) await sleep(rand(400, 1200));
@@ -3111,7 +3755,6 @@ async function processCommand(raw) {
   }
 }
 
-// password input type handling
 cmdInput.addEventListener('keydown', function pw(e) {
   if (e.key === 'Enter' && state.waitingPw) {
     cmdInput.type = 'text';
