@@ -1,0 +1,21 @@
+{
+  "short_name": "TSCPP ADV",
+  "name": "TSCPP Advanced Terminal",
+  "description": "A highly functional fake terminal for tscpp. I will add more stuff over time to make it as close to a real terminal as possible.",
+  "icons": [
+    {
+      "src": "TSCPP.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "TSCPP.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#000000",
+  "display": "fullscreen",
+  "theme_color": "#000000"
+}
