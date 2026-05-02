@@ -2,17 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSCPP Advanced Terminal v6.0</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TSCPP Advanced Terminal v7.0</title>
 <link rel="icon" type="image/png" href="TSCPP.png">
-<link rel="manifest" href="manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('serviceworker.js')
-      .then(() => console.log("Service Worker Registered"));
-  }
-</script>
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
 
@@ -28,9 +19,9 @@
     --surface: #0a120a;
     --border: #1a2e1a;
   }
-
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+  /*It is always good to have comments so i can fucking remember what is what after a while, which i recommend for you too.*/
   body {
     background: var(--bg);
     color: var(--green);
@@ -475,6 +466,108 @@
   .toast.warn { border-color: var(--amber); color: var(--amber); }
   .toast.err  { border-color: var(--red); color: var(--red); }
 
+  /* ── FIRST-RUN SETUP WIZARD ─────────────────────────────────────────── */
+  #setup-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  #setup-overlay.hidden { display: none; }
+  .setup-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 6px;
+    text-shadow: 0 0 20px rgba(0,255,65,0.5);
+  }
+  .setup-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--green-dim);
+    letter-spacing: 3px;
+  }
+  .setup-box {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 24px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 360px;
+  }
+  .setup-step-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--green-dim);
+    font-family: 'Orbitron', monospace;
+  }
+  .setup-step-desc {
+    font-size: 12px;
+    color: #3a6a3a;
+    line-height: 1.6;
+  }
+  .setup-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .setup-field label {
+    font-size: 10px;
+    color: #2a4a2a;
+    letter-spacing: 1px;
+  }
+  .setup-field input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 10px;
+    outline: none;
+    caret-color: var(--green);
+    transition: border-color 0.2s;
+  }
+  .setup-field input:focus { border-color: var(--green-dim); }
+  .setup-field input.bad { border-color: var(--red); }
+  .setup-btn {
+    background: var(--green-dark);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    align-self: flex-end;
+  }
+  .setup-btn:hover { background: var(--green-dim); color: var(--bg); }
+  .setup-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .setup-warn {
+    font-size: 10px;
+    color: var(--amber);
+    min-height: 14px;
+  }
+  .setup-progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .setup-pip {
+    width: 24px; height: 3px;
+    background: var(--green-dark);
+    transition: background 0.3s;
+  }
+  .setup-pip.done { background: var(--green); }
+  .setup-pip.active { background: var(--green-dim); }
+
   /* Hardware failure effects */
   @keyframes glitch-h {
     0%   { transform: translate(0); }
@@ -567,12 +660,42 @@
 </div>
 
 <!-- Lock Screen -->
-<div id="lockscreen">
+<!-- First-Run Setup Wizard -->
+<div id="setup-overlay">
+  <div class="setup-logo">TSCPP</div>
+  <div class="setup-title">FIRST-TIME SETUP</div>
+  <div class="setup-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="setup-step-label" id="setup-step-label">STEP 1 OF 2</div>
+      <div class="setup-progress">
+        <div class="setup-pip active" id="pip-0"></div>
+        <div class="setup-pip" id="pip-1"></div>
+      </div>
+    </div>
+    <div class="setup-step-desc" id="setup-desc">
+      Set your <strong style="color:var(--green)">Terminal Access Key</strong>.<br>
+      This is the password you'll enter on the lock screen every time you open the terminal.
+    </div>
+    <div class="setup-field">
+      <label id="setup-field1-label">ACCESS KEY</label>
+      <input type="password" id="setup-input1" autocomplete="new-password" placeholder="choose a password..." maxlength="64">
+    </div>
+    <div class="setup-field">
+      <label id="setup-field2-label">CONFIRM ACCESS KEY</label>
+      <input type="password" id="setup-input2" autocomplete="new-password" placeholder="repeat password..." maxlength="64">
+    </div>
+    <div class="setup-warn" id="setup-warn"></div>
+    <button class="setup-btn" id="setup-next-btn" onclick="setupNext()">CONTINUE →</button>
+  </div>
+  <div style="font-size:10px;color:#1a3a1a;letter-spacing:1px;">PASSWORDS ARE STORED LOCALLY — NEVER TRANSMITTED</div>
+</div>
+
+<div id="lockscreen" class="hidden">
   <div class="lock-bars">
     <div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div>
   </div>
   <div class="lock-logo">TSCPP</div>
-  <div class="lock-sub">ADVANCED TERMINAL v6.0</div>
+  <div class="lock-sub">ADVANCED TERMINAL v7.0</div>
   <div class="lock-input-wrap" id="lock-wrap">
     <span style="color:#1e3e1e;font-size:11px;">KEY:</span>
     <input type="password" id="lock-input" autofocus autocomplete="off" placeholder="ENTER ACCESS KEY">
@@ -679,8 +802,9 @@
 
 <script>
 // ─── STATE ───────────────────────────────────────────────────────────────────
-const MASTER_KEY = "TSCPP-1993";
-const ROOT_KEY   = "Secret@Agent983";
+const MASTER_KEY = localStorage.getItem('tscpp_master_key') || null;
+const ROOT_KEY   = localStorage.getItem('tscpp_root_key')   || null;
+const FIRST_RUN  = !MASTER_KEY;
 
 const _s = JSON.parse(localStorage.getItem('tscpp_state') || 'null') || {};
 let state = {
@@ -771,7 +895,7 @@ const FILE_CONSEQUENCES = {
 };
 
 let files = JSON.parse(localStorage.getItem('tscpp_files') || 'null') || {
-  "welcome.txt":  "TSCPP Terminal v6.0 — Connection required for cloud sync.",
+  "welcome.txt":  "TSCPP Terminal v7.0 — Connection required for cloud sync.",
   "note.txt":     "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
   "readme.md":    "Welcome agent. Type HELP for command reference.",
 };
@@ -912,6 +1036,7 @@ const CMD_HELP = {
   nano:         { desc:'Open a file in the nano editor',           usage:'nano [file]',                 ex:['nano note.txt','nano /tmp/x.txt'] },
   theme:        { desc:'Change the terminal colour theme',         usage:'theme [name]',                ex:['theme amber','theme blue','theme red','theme ice'] },
   macro:        { desc:'Record and replay command sequences',      usage:'macro [list|record|stop|run|delete] [name]', ex:['macro record myflow','macro stop','macro run myflow','macro list'] },
+  passwd:       { desc:'Change your lock screen or root key',      usage:'passwd [lock|root]',           ex:['passwd lock','passwd root'] },
   man:          { desc:'Show the manual page for a command',       usage:'man [command]',               ex:['man hack','man ls','man tunnel'] },
 };
 
@@ -1018,6 +1143,7 @@ const COMMANDS = [
   'firewall','vpn','proxy','encode','decode','env','alias','history','echo',
   'date','uptime','kill','ps','chmod','find','grep','diff','zip','unzip',
   'sidebar','minimap','syshealth','restore','os-reinstall','nano','theme','macro',
+  'pwd','cd','mkdir','rmdir','man','passwd',
 ];
 
 // ─── UTILITIES ───────────────────────────────────────────────────────────────
@@ -1076,6 +1202,92 @@ function printTable(headers, rows, cls='') {
   print(headers.map((_,i)=>'-'.repeat(colW[i])).join('  '), 'sep');
   rows.forEach(r => print(fmt(r), cls));
 }
+
+// ─── SETUP WIZARD ────────────────────────────────────────────────────────────
+let setupStep = 1; // 1 = lock key, 2 = root key
+let pendingMasterKey = null;
+
+function setupNext() {
+  const i1 = document.getElementById('setup-input1');
+  const i2 = document.getElementById('setup-input2');
+  const warn = document.getElementById('setup-warn');
+  const p1 = i1.value.trim(), p2 = i2.value.trim();
+
+  warn.textContent = '';
+  i1.classList.remove('bad'); i2.classList.remove('bad');
+
+  if (!p1) { warn.textContent = 'Password cannot be empty.'; i1.classList.add('bad'); return; }
+  if (p1.length < 4) { warn.textContent = 'Minimum 4 characters required.'; i1.classList.add('bad'); return; }
+  if (p1 !== p2) { warn.textContent = 'Passwords do not match.'; i2.classList.add('bad'); return; }
+
+  if (setupStep === 1) {
+    pendingMasterKey = p1;
+    // Move to step 2 — root key
+    setupStep = 2;
+    document.getElementById('setup-step-label').textContent = 'STEP 2 OF 2';
+    document.getElementById('pip-0').className = 'setup-pip done';
+    document.getElementById('pip-1').className = 'setup-pip active';
+    document.getElementById('setup-desc').innerHTML =
+      `Set your <strong style="color:var(--amber)">Root Access Key</strong>.<br>
+       This is the password used to elevate to ROOT inside the terminal. Keep it separate from your lock key.`;
+    document.getElementById('setup-field1-label').textContent = 'ROOT KEY';
+    document.getElementById('setup-field2-label').textContent = 'CONFIRM ROOT KEY';
+    document.getElementById('setup-next-btn').textContent = 'FINISH SETUP →';
+    i1.value = ''; i2.value = ''; i1.focus();
+    return;
+  }
+
+  if (setupStep === 2) {
+    if (p1 === pendingMasterKey) {
+      warn.textContent = 'Root key must differ from your lock screen key.';
+      i1.classList.add('bad'); return;
+    }
+    // Save both keys
+    localStorage.setItem('tscpp_master_key', pendingMasterKey);
+    localStorage.setItem('tscpp_root_key', p1);
+    // Apply to runtime (we can't reassign const — use wrapper vars instead)
+    _activeKeys.master = pendingMasterKey;
+    _activeKeys.root   = p1;
+    document.getElementById('pip-1').className = 'setup-pip done';
+
+    // Fade out setup, show lock screen
+    const so = document.getElementById('setup-overlay');
+    so.style.transition = 'opacity 0.5s';
+    so.style.opacity = '0';
+    setTimeout(() => {
+      so.classList.add('hidden');
+      document.getElementById('lockscreen').classList.remove('hidden');
+      document.getElementById('lock-input').focus();
+    }, 500);
+  }
+}
+
+// ─── ACTIVE KEYS (mutable at runtime) ────────────────────────────────────────
+const _activeKeys = {
+  master: localStorage.getItem('tscpp_master_key') || 'TSCPP-1993',
+  root:   localStorage.getItem('tscpp_root_key')   || 'Secret@Agent983',
+};
+
+// Pressing Enter in setup fields triggers setupNext
+['setup-input1','setup-input2'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') setupNext();
+  });
+});
+
+// On load — show setup if first run, otherwise show lock screen
+window.addEventListener('DOMContentLoaded', () => {
+  const hasMaster = !!localStorage.getItem('tscpp_master_key');
+  if (!hasMaster) {
+    document.getElementById('setup-overlay').classList.remove('hidden');
+    document.getElementById('lockscreen').classList.add('hidden');
+    document.getElementById('setup-input1').focus();
+  } else {
+    document.getElementById('setup-overlay').classList.add('hidden');
+    document.getElementById('lockscreen').classList.remove('hidden');
+    document.getElementById('lock-input').focus();
+  }
+});
 
 // ─── TOAST ───────────────────────────────────────────────────────────────────
 function toast(msg, type='ok', duration=2500) {
@@ -1605,8 +1817,35 @@ setInterval(() => {
 cmdInput.addEventListener('input', () => {
   const val = cmdInput.value;
   if (!val) { acHint.textContent = ''; return; }
-  const match = COMMANDS.find(c => c.startsWith(val) && c !== val);
-  acHint.textContent = match ? match.slice(val.length) : '';
+  const parts = val.split(/\s+/);
+
+  // If typing a command (first word only)
+  if (parts.length === 1) {
+    const match = COMMANDS.find(c => c.startsWith(val) && c !== val);
+    acHint.textContent = match ? match.slice(val.length) : '';
+    return;
+  }
+
+  // If typing a second argument that looks like a file/path — suggest from cwd + full paths
+  const fileCmds = ['cat','nano','write','erase','rename','grep','diff','chmod','zip','download','exfil','restore','find'];
+  const dirCmds  = ['cd','ls','mkdir','rmdir'];
+  const lastArg  = parts[parts.length - 1];
+  const baseCmd  = parts[0].toLowerCase();
+
+  if (fileCmds.includes(baseCmd) && parts.length === 2) {
+    const cwdFiles = filesInDir(state.cwd);
+    const allFiles = Object.keys(files);
+    const pool     = lastArg.startsWith('/') ? allFiles.map(f => (fileLocations[f]||'/home/agent')+'/'+f) : cwdFiles;
+    const match    = pool.find(f => f.startsWith(lastArg) && f !== lastArg);
+    acHint.textContent = match ? match.slice(lastArg.length) : '';
+    return;
+  }
+  if (dirCmds.includes(baseCmd) && parts.length === 2) {
+    const match = dirs.find(d => d.startsWith(lastArg) && d !== lastArg);
+    acHint.textContent = match ? match.slice(lastArg.length) : '';
+    return;
+  }
+  acHint.textContent = '';
 });
 
 cmdInput.addEventListener('keydown', async (e) => {
@@ -1626,7 +1865,7 @@ cmdInput.addEventListener('keydown', async (e) => {
     const val = cmdInput.value.trim();
     cmdInput.value = ''; acHint.textContent = '';
     if (state.locked) {
-      if (val === MASTER_KEY) bootSequence();
+      if (val === _activeKeys.master) bootSequence();
       else {
         document.getElementById('lock-wrap').className = 'lock-input-wrap shake';
         setTimeout(() => document.getElementById('lock-wrap').className='lock-input-wrap', 500);
@@ -1642,7 +1881,7 @@ cmdInput.addEventListener('keydown', async (e) => {
 document.getElementById('lock-input').addEventListener('keydown', async e => {
   if (e.key === 'Enter') {
     const val = document.getElementById('lock-input').value.trim();
-    if (val === MASTER_KEY) {
+    if (val === _activeKeys.master) {
       document.getElementById('lockscreen').className = 'hidden';
       bootSequence();
     } else {
@@ -1670,7 +1909,7 @@ async function bootSequence() {
   updateRisk();
 
   const lines = [
-    ['>> TSCPP BIOS v6.0 — INITIALIZING...','sys'],
+    ['>> TSCPP BIOS v7.0 — INITIALIZING...','sys'],
     ['>> CPU CHECK........ [ 8-CORE / 4.2GHz ]  [ OK ]','sys'],
     ['>> RAM CHECK........ [ 32GB DDR5 ECC ]     [ OK ]','sys'],
     ['>> DISK CHECK....... [ 2TB NVME RAID-1 ]   [ OK ]','sys'],
@@ -1708,12 +1947,13 @@ async function bootSequence() {
 
 // ─── PROMPT ──────────────────────────────────────────────────────────────────
 function updatePrompt() {
-  const user = state.admin ? 'ROOT' : 'AGENT';
-  const sym  = state.admin ? ':#'   : ':~$';
-  promptSpan.textContent = `${user}@${state.currentServer}${sym}`;
+  const user    = state.admin ? 'ROOT' : 'AGENT';
+  const sym     = state.admin ? ':#'   : ':~$';
+  // Show a shortened cwd — replace /home/agent with ~
+  const short   = state.cwd.replace('/home/agent', '~').replace('/home/agent', '~') || '/';
+  promptSpan.textContent = `${user}@${state.currentServer} ${short}${sym}`;
   promptSpan.className   = state.admin ? 'root' : '';
   document.getElementById('sb-node').textContent = state.currentServer;
-
   if (state.admin) {
     threatBadge.textContent = 'THREAT: UNRESTRICTED';
     threatBadge.className   = 'elevated';
@@ -1768,7 +2008,7 @@ async function processCommand(raw) {
   // password prompt handler
   if (state.waitingPw) {
     state.waitingPw = false;
-    if (raw === ROOT_KEY) {
+    if (raw === _activeKeys.root) {
       state.admin = true;
       updatePrompt();
       await typePrint('ROOT ACCESS GRANTED. ALL TOOLS UNLOCKED.', 'admin');
@@ -1806,22 +2046,29 @@ async function processCommand(raw) {
 
     // ── HELP ──────────────────────────────────────────────────────────────
     case 'help': {
+      if (args[1]) { printUsage(args[1]); break; }
       printSep();
-      await typePrint('TSCPP TERMINAL v6.0 — COMMAND REFERENCE', 'sys', 6);
+      await typePrint('TSCPP TERMINAL v7.0 — COMMAND REFERENCE', 'sys', 6);
+      print('  TIP: Type "help [command]" or "man [command]" for detailed usage.', 'dim');
       printSep();
       const groups = [
-        ['CORE',    ['help','clear','panic','reboot','echo [text]','date','uptime','history','env','alias [n] [cmd]']],
+        ['CORE',    ['help [cmd]','clear','panic','reboot','echo','date','uptime','history','env','alias']],
         ['AUTH',    ['login','logout','whoami','status']],
-        ['NETWORK', ['scan','hack [id]','wifi-override','tunnel [ip]','ping [host]','trace [host]','netstat','portmap','nmap [ip]','sniff','arp','spoof [ip]']],
-        ['FILES',   ['ls','cat [file]','write [file] [text]','erase [file]','rename [old] [new]','find [term]','grep [term] [file]','diff [f1] [f2]','chmod [file] [perm]','zip [file]','unzip [file]']],
-        ['EXPLOIT', ['bruteforce [target]','inject [target]','keylog [start|stop]','crack [hash]','decrypt [text]','exfil [file]','firewall [on|off]','vpn [on|off]','proxy [ip]']],
-        ['ROOT',    ['locate','download [file]','encode [text]','decode [text]','ps','kill [pid]','sysinfo','restore [file]']],
-        ['TOOLS',   ['matrix','connect tscpp main','sidebar','minimap','syshealth','os-reinstall','nano [file]','theme [name]','macro [list|record|stop|run|delete]']],
+        ['FS',      ['pwd','cd','ls','mkdir','rmdir','cat','nano','write','erase','rename','find','grep','diff','chmod','zip','download']],
+        ['NETWORK', ['scan','hack','wifi-override','tunnel','ping','trace','netstat','portmap','nmap','sniff','arp','spoof']],
+        ['EXPLOIT', ['bruteforce','inject','keylog','crack','decrypt','exfil','firewall','vpn','proxy']],
+        ['ROOT',    ['locate','encode','decode','ps','kill','sysinfo','restore','os-reinstall']],
+        ['TOOLS',   ['matrix','connect','sidebar','minimap','syshealth','nano','theme','macro','man']],
       ];
       for (const [grp, cmds] of groups) {
         print('', '');
         print(`  [ ${grp} ]`, 'admin');
-        cmds.forEach(c => print(`    ${c}`, ''));
+        // Show name + first-line desc for each
+        cmds.forEach(c => {
+          const key = c.split(' ')[0];
+          const desc = CMD_HELP[key]?.desc || '';
+          print(`    ${key.padEnd(16)} ${desc}`, '');
+        });
       }
       printSep();
       break;
@@ -1905,6 +2152,76 @@ async function processCommand(raw) {
       state.admin = false; updatePrompt();
       await typePrint('ADMIN SESSION TERMINATED.', 'sys');
       break;
+
+    // ── PASSWD ────────────────────────────────────────────────────────────
+    case 'passwd': {
+      const target = (args[1] || 'lock').toLowerCase();
+      if (target !== 'lock' && target !== 'root') {
+        print('USAGE: passwd [lock|root]', 'err');
+        print('  lock — change your terminal lock screen key', 'dim');
+        print('  root — change your ROOT access key', 'dim');
+        break;
+      }
+      const isRoot = target === 'root';
+      if (isRoot && !state.admin) { print('ERR: Must be ROOT to change root key.', 'err'); break; }
+
+      await typePrint(`CHANGING ${isRoot ? 'ROOT' : 'LOCK SCREEN'} KEY`, 'sys');
+
+      // Verify current password first
+      await typePrint('Enter current key to confirm identity:', 'warn');
+      const current = await new Promise(res => {
+        state.waitingInput = { resolve: res };
+        cmdInput.type = 'password';
+      });
+      cmdInput.type = 'text';
+
+      const correctCurrent = isRoot ? _activeKeys.root : _activeKeys.master;
+      if (current !== correctCurrent) {
+        await typePrint('ERR: Current key incorrect. Change aborted.', 'err');
+        bumpRisk(10);
+        break;
+      }
+
+      await typePrint('Enter new key (min 4 characters):', 'sys');
+      const newKey = await new Promise(res => {
+        state.waitingInput = { resolve: res };
+        cmdInput.type = 'password';
+      });
+      cmdInput.type = 'text';
+
+      if (!newKey || newKey.length < 4) {
+        await typePrint('ERR: Key too short — minimum 4 characters.', 'err'); break;
+      }
+      if (!isRoot && newKey === _activeKeys.root) {
+        await typePrint('ERR: Lock key cannot match root key.', 'err'); break;
+      }
+      if (isRoot && newKey === _activeKeys.master) {
+        await typePrint('ERR: Root key cannot match lock key.', 'err'); break;
+      }
+
+      await typePrint('Confirm new key:', 'sys');
+      const confirm = await new Promise(res => {
+        state.waitingInput = { resolve: res };
+        cmdInput.type = 'password';
+      });
+      cmdInput.type = 'text';
+
+      if (newKey !== confirm) {
+        await typePrint('ERR: Keys do not match. Change aborted.', 'err'); break;
+      }
+
+      if (isRoot) {
+        _activeKeys.root = newKey;
+        localStorage.setItem('tscpp_root_key', newKey);
+      } else {
+        _activeKeys.master = newKey;
+        localStorage.setItem('tscpp_master_key', newKey);
+      }
+
+      await typePrint(`${isRoot ? 'ROOT' : 'LOCK SCREEN'} KEY UPDATED SUCCESSFULLY.`, 'success');
+      toast(`${isRoot?'ROOT':'LOCK'} KEY CHANGED`, 'ok');
+      break;
+    }
 
     // ── WHOAMI ────────────────────────────────────────────────────────────
     case 'whoami':
@@ -2173,118 +2490,234 @@ async function processCommand(raw) {
 
     // ── LS ────────────────────────────────────────────────────────────────
     case 'ls': {
-      if (!state.hasWifi) { print('ERR: NO NETWORK ACCESS.', 'err'); break; }
-      const keys = Object.keys(files);
-      if (!keys.length) { print('(empty)', 'dim'); break; }
-      printTable(
-        ['FILE','TYPE','SIZE','PERMS','HEALTH'],
-        keys.map(k => {
-          const isSys = isSystemFile(k);
-          const effKey = FILE_CONSEQUENCES[k]?.erase?.effects?.[0];
-          const healthy = !effKey || sysHealth[effKey] !== false;
-          return [
-            k,
-            isSys ? '[SYS]' : '[USR]',
-            files[k].length + ' B',
-            isSys ? (state.admin ? 'rwx------' : 'r--------') : (state.admin ? 'rwxrwxrwx' : 'rw-r--r--'),
-            isSys ? (healthy ? 'OK' : '!! DAMAGED') : '--'
-          ];
-        })
-      );
+      const targetDir = args[1] ? normPath(args[1]) : state.cwd;
+      if (!dirs.includes(targetDir)) { print(`ERR: '${targetDir}' is not a directory.`, 'err'); break; }
+      if (!canRead(targetDir)) { print(`ERR: Permission denied — '${targetDir}' requires ROOT.`, 'err'); break; }
+
+      // Sub-directories inside targetDir
+      const subDirs = dirs.filter(d => {
+        if (d === targetDir) return false;
+        const parent = d.includes('/') ? d.substring(0, d.lastIndexOf('/')) || '/' : '/';
+        return parent === targetDir;
+      });
+      // Files in this dir
+      const localFiles = filesInDir(targetDir);
+
+      print('', '');
+      print(`  ${targetDir}`, 'admin');
+      printSep('─', 52);
+      if (subDirs.length === 0 && localFiles.length === 0) { print('  (empty)', 'dim'); break; }
+
+      subDirs.forEach(d => {
+        const dname = d.split('/').pop();
+        const perm  = DIR_PERMS[d] || { r:'all', w:'all' };
+        const permStr = `${perm.r==='root'?'r--------':'r-xr-xr-x'}`;
+        print(`  drwx  ${permStr}  ${dname}/`, 'sys');
+      });
+      localFiles.forEach(f => {
+        const isSys   = isSystemFile(f);
+        const effKey  = FILE_CONSEQUENCES[f]?.erase?.effects?.[0];
+        const healthy = !effKey || sysHealth[effKey] !== false;
+        const permStr = isSys ? (state.admin ? 'rw-------' : 'r--------') : (state.admin ? 'rwxrwxrwx' : 'rw-r--r--');
+        const tag     = isSys ? (healthy ? '[SYS]  ' : '[SYS!!]') : '[USR]  ';
+        print(`  -${permStr}  ${tag}  ${String(files[f].length).padStart(6)} B   ${f}`, isSys && !healthy ? 'err' : '');
+      });
+      printSep('─', 52);
       break;
     }
 
     // ── CAT ───────────────────────────────────────────────────────────────
-    case 'cat':
-      if (!state.hasWifi) { print('ERR: NO NETWORK ACCESS.', 'err'); break; }
-      if (!args[1]) { print('USAGE: cat [file]', 'err'); break; }
-      if (files[args[1]]) {
-        printSep();
-        print(files[args[1]]);
-        printSep();
-      } else { print('ERR: FILE NOT FOUND.', 'err'); }
+    case 'cat': {
+      if (!args[1]) { printUsage('cat'); break; }
+      const { name: catName, dir: catDir } = resolveFile(args[1]);
+      if (!dirs.includes(catDir) || !canRead(catDir)) { print(`ERR: Permission denied — cannot read '${catDir}'.`, 'err'); break; }
+      if (isSystemFile(catName) && catDir !== '/sys' && catDir !== '/etc' && catDir !== '/var/log') {
+        // allow reading system files from their actual location
+      }
+      const isSysCat = isSystemFile(catName);
+      if (isSysCat && !state.admin && DIR_PERMS[catDir]?.r === 'root') {
+        print(`ERR: Permission denied — '${catName}' requires ROOT.`, 'err'); break;
+      }
+      if (!files[catName]) { print(`ERR: '${catName}': No such file.`, 'err'); break; }
+      printSep();
+      print(`  ${catDir}/${catName}`, 'dim');
+      printSep();
+      files[catName].split('\n').forEach(l => print('  ' + l));
+      printSep();
       break;
+    }
 
     // ── WRITE ─────────────────────────────────────────────────────────────
-    case 'write':
-      if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
-      if (args.length < 3) { print('USAGE: write [file] [text]', 'err'); break; }
-      {
-        const wName = args[1];
-        const newContent = args.slice(2).join(' ');
-        const isSys = isSystemFile(wName);
-        files[wName] = newContent;
-        saveFiles();
-        await typePrint(`FILE '${wName}' SAVED (${newContent.length} BYTES).`, 'admin');
-        if (isSys) {
-          const orig = SYSTEM_FILES[wName] || '';
-          const origKeys = orig.split('\n').map(l => l.split('=')[0].trim()).filter(Boolean);
-          const missingKeys = origKeys.filter(k => !newContent.includes(k));
-          if (missingKeys.length > 0 || newContent.length < orig.length * 0.4) {
-            await sleep(200);
-            await typePrint(`  WARNING: ${missingKeys.length} EXPECTED KEY(S) MISSING FROM SYSTEM FILE`, 'warn');
-            await applyFileConsequence(wName, 'corrupt');
-          } else {
-            // Restore health for this file's systems
-            (FILE_CONSEQUENCES[wName]?.erase?.effects || []).forEach(e => { sysHealth[e] = true; });
-            saveSysHealth();
-            await typePrint('SYSTEM FILE INTEGRITY CHECK PASSED — HEALTH RESTORED.', 'sys');
-          }
+    case 'write': {
+      if (args.length < 3) { printUsage('write'); break; }
+      const { name: wName, dir: wDir } = resolveFile(args[1]);
+      if (!dirs.includes(wDir)) { print(`ERR: Directory '${wDir}' does not exist.`, 'err'); break; }
+      if (!canWrite(wDir)) { print(`ERR: Permission denied — '${wDir}' requires ROOT.`, 'err'); break; }
+      if (isSystemFile(wName) && !state.admin) { print(`ERR: Permission denied — '${wName}' requires ROOT.`, 'err'); break; }
+      const newContent = args.slice(2).join(' ');
+      files[wName] = newContent;
+      fileLocations[wName] = wDir;
+      saveFiles(); saveLocs();
+      await typePrint(`FILE '${wDir}/${wName}' SAVED (${newContent.length} BYTES).`, 'admin');
+      if (isSystemFile(wName)) {
+        const orig     = SYSTEM_FILES[wName] || '';
+        const origKeys = orig.split('\n').map(l => l.split('=')[0].trim()).filter(Boolean);
+        const missing  = origKeys.filter(k => !newContent.includes(k));
+        if (missing.length > 0 || newContent.length < orig.length * 0.4) {
+          await sleep(200);
+          await typePrint(`  WARNING: ${missing.length} EXPECTED KEY(S) MISSING FROM SYSTEM FILE`, 'warn');
+          await applyFileConsequence(wName, 'corrupt');
+        } else {
+          (FILE_CONSEQUENCES[wName]?.erase?.effects || []).forEach(e => { sysHealth[e] = true; });
+          saveSysHealth();
+          await typePrint('SYSTEM FILE INTEGRITY CHECK PASSED — HEALTH RESTORED.', 'sys');
         }
       }
       break;
+    }
 
     // ── ERASE ─────────────────────────────────────────────────────────────
-    case 'erase':
-      if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
-      if (!args[1]) { print('USAGE: erase [file]', 'err'); break; }
-      if (files[args[1]]) {
-        if (isSystemFile(args[1])) {
-          await typePrint(`WARNING: '${args[1]}' IS A PROTECTED SYSTEM FILE.`, 'warn');
-          await typePrint('ERASING SYSTEM FILES CAN CAUSE IRREVERSIBLE DAMAGE.', 'warn');
-          await typePrint(`CONFIRM ERASE? TYPE 'yes' TO PROCEED:`, 'warn');
-          state.waitingInput = { resolve: async (answer) => {
-            if (answer.toLowerCase() === 'yes') {
-              delete files[args[1]]; saveFiles();
-              await typePrint(`SYSTEM FILE '${args[1]}' ERASED.`, 'admin');
-              await applyFileConsequence(args[1], 'erase');
-            } else {
-              await typePrint('ERASE ABORTED.', 'sys');
-            }
-          }};
-          // Wrap resolve so it gets called properly
-          const p = new Promise(res => { const orig = state.waitingInput.resolve; state.waitingInput.resolve = async (v) => { await orig(v); res(); }; });
-          await p;
-        } else {
-          delete files[args[1]]; saveFiles();
-          await typePrint(`'${args[1]}' ERASED.`, 'admin');
-        }
-      } else { print('ERR: FILE NOT FOUND.', 'err'); }
+    case 'erase': {
+      if (!args[1]) { printUsage('erase'); break; }
+      const { name: eName, dir: eDir } = resolveFile(args[1]);
+      if (!files[eName]) { print(`ERR: '${eName}': No such file.`, 'err'); break; }
+      if (!canWrite(eDir)) { print(`ERR: Permission denied — '${eDir}' requires ROOT.`, 'err'); break; }
+      if (isSystemFile(eName) && !state.admin) { print(`ERR: Permission denied — '${eName}' requires ROOT.`, 'err'); break; }
+
+      if (isSystemFile(eName)) {
+        print('', '');
+        print(`  !! '${eName}' IS A PROTECTED SYSTEM FILE !!`, 'err');
+        print(`  Erasing it will damage the ${FILE_CONSEQUENCES[eName]?.erase?.effects?.join(', ')} subsystem.`, 'warn');
+        await typePrint(`  Type 'yes' to confirm permanent erase, anything else cancels:`, 'warn');
+        const ans = await new Promise(res => { state.waitingInput = { resolve: res }; });
+        if (ans.trim().toLowerCase() !== 'yes') { await typePrint('ERASE ABORTED.', 'sys'); break; }
+        delete files[eName];
+        delete fileLocations[eName];
+        saveFiles(); saveLocs();
+        await typePrint(`SYSTEM FILE '${eName}' ERASED.`, 'admin');
+        await applyFileConsequence(eName, 'erase');
+      } else {
+        delete files[eName];
+        delete fileLocations[eName];
+        saveFiles(); saveLocs();
+        await typePrint(`'${eDir}/${eName}' ERASED.`, 'admin');
+      }
       break;
+    }
 
     // ── RENAME ────────────────────────────────────────────────────────────
-    case 'rename':
-      if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
-      if (args.length < 3) { print('USAGE: rename [old] [new]', 'err'); break; }
-      if (files[args[1]]) {
-        files[args[2]] = files[args[1]]; delete files[args[1]]; saveFiles();
-        await typePrint(`RENAMED '${args[1]}' -> '${args[2]}'.`, 'admin');
-      } else { print('ERR: FILE NOT FOUND.', 'err'); }
+    case 'rename': {
+      if (args.length < 3) { printUsage('rename'); break; }
+      const { name: rOld, dir: rDir } = resolveFile(args[1]);
+      if (!files[rOld]) { print(`ERR: '${rOld}': No such file.`, 'err'); break; }
+      if (!canWrite(rDir)) { print(`ERR: Permission denied — '${rDir}' requires ROOT.`, 'err'); break; }
+      if ((isSystemFile(rOld) || isSystemFile(args[2])) && !state.admin) {
+        print(`ERR: Permission denied — renaming system files requires ROOT.`, 'err'); break;
+      }
+      const rNew = args[2].includes('/') ? args[2].split('/').pop() : args[2];
+      files[rNew] = files[rOld];
+      fileLocations[rNew] = rDir;
+      delete files[rOld];
+      delete fileLocations[rOld];
+      saveFiles(); saveLocs();
+      await typePrint(`RENAMED '${rOld}' -> '${rNew}'.`, 'admin');
       break;
+    }
 
     // ── FIND ──────────────────────────────────────────────────────────────
-    case 'find':
-      if (!args[1]) { print('USAGE: find [term]', 'err'); break; }
-      Object.keys(files).filter(k=>k.includes(args[1])).forEach(k=>print(`  ./${k}`, 'sys'));
+    case 'find': {
+      if (!args[1]) { printUsage('find'); break; }
+      const term = args[1];
+      let found = 0;
+      Object.keys(files).forEach(f => {
+        if (f.includes(term)) {
+          const d = fileLocations[f] || '/home/agent';
+          print(`  ${d}/${f}`, 'sys');
+          found++;
+        }
+      });
+      dirs.forEach(d => { if (d.includes(term)) { print(`  ${d}/`, 'sys'); found++; } });
+      if (!found) print(`  (no matches for '${term}')`, 'dim');
       break;
+    }
 
     // ── GREP ──────────────────────────────────────────────────────────────
-    case 'grep':
-      if (args.length < 3) { print('USAGE: grep [term] [file]', 'err'); break; }
-      if (!files[args[2]]) { print('ERR: FILE NOT FOUND.', 'err'); break; }
-      files[args[2]].split('\n').forEach((line,i) => {
-        if (line.includes(args[1])) print(`  ${args[2]}:${i+1}: ${line}`, 'sys');
+    case 'grep': {
+      if (args.length < 3) { printUsage('grep'); break; }
+      const gTerm = args[1];
+      const { name: gName } = resolveFile(args[2]);
+      if (!files[gName]) { print(`ERR: '${gName}': No such file.`, 'err'); break; }
+      const gDir = fileLocations[gName] || '/home/agent';
+      if (!canRead(gDir)) { print(`ERR: Permission denied.`, 'err'); break; }
+      if (isSystemFile(gName) && DIR_PERMS[gDir]?.r === 'root' && !state.admin) {
+        print(`ERR: Permission denied — '${gName}' requires ROOT.`, 'err'); break;
+      }
+      let gFound = 0;
+      files[gName].split('\n').forEach((line, i) => {
+        if (line.toLowerCase().includes(gTerm.toLowerCase())) {
+          const hi = line.replace(new RegExp(gTerm,'gi'), m => `[${m}]`);
+          print(`  ${gName}:${i+1}:  ${hi}`, 'sys');
+          gFound++;
+        }
       });
+      if (!gFound) print(`  (no matches for '${gTerm}' in ${gName})`, 'dim');
+      break;
+    }
+
+    // ── PWD ───────────────────────────────────────────────────────────────
+    case 'pwd':
+      print(state.cwd, 'sys');
+      break;
+
+    // ── CD ────────────────────────────────────────────────────────────────
+    case 'cd': {
+      const target = args[1] ? normPath(args[1]) : '/home/agent';
+      if (!dirs.includes(target)) { print(`ERR: cd: '${target}': No such directory.`, 'err'); break; }
+      if (!canRead(target)) { print(`ERR: Permission denied — '${target}' requires ROOT.`, 'err'); break; }
+      state.cwd = target;
+      updatePrompt();
+      break;
+    }
+
+    // ── MKDIR ─────────────────────────────────────────────────────────────
+    case 'mkdir': {
+      if (!args[1]) { printUsage('mkdir'); break; }
+      const mkPath = normPath(args[1]);
+      const mkParent = mkPath.substring(0, mkPath.lastIndexOf('/')) || '/';
+      if (!dirs.includes(mkParent)) { print(`ERR: Parent directory '${mkParent}' does not exist.`, 'err'); break; }
+      if (!canWrite(mkParent)) { print(`ERR: Permission denied — '${mkParent}' requires ROOT.`, 'err'); break; }
+      if (dirs.includes(mkPath)) { print(`ERR: '${mkPath}': Directory already exists.`, 'err'); break; }
+      dirs.push(mkPath);
+      DIR_PERMS[mkPath] = { r:'all', w: state.admin ? 'all' : 'all' };
+      saveDirs();
+      await typePrint(`DIRECTORY CREATED: ${mkPath}`, 'success');
+      break;
+    }
+
+    // ── RMDIR ─────────────────────────────────────────────────────────────
+    case 'rmdir': {
+      if (!args[1]) { printUsage('rmdir'); break; }
+      const rmPath = normPath(args[1]);
+      const protected_ = ['/','/home','/home/agent','/sys','/etc','/var','/var/log','/root'];
+      if (protected_.includes(rmPath)) { print(`ERR: Cannot remove protected system directory '${rmPath}'.`, 'err'); break; }
+      if (!dirs.includes(rmPath)) { print(`ERR: '${rmPath}': No such directory.`, 'err'); break; }
+      if (!canWrite(rmPath)) { print(`ERR: Permission denied — requires ROOT.`, 'err'); break; }
+      if (filesInDir(rmPath).length > 0) { print(`ERR: '${rmPath}': Directory not empty. Erase files first.`, 'err'); break; }
+      if (state.cwd === rmPath) { state.cwd = '/home/agent'; updatePrompt(); }
+      dirs = dirs.filter(d => d !== rmPath);
+      saveDirs();
+      await typePrint(`DIRECTORY REMOVED: ${rmPath}`, 'admin');
+      break;
+    }
+
+    // ── MAN ───────────────────────────────────────────────────────────────
+    case 'man':
+      if (!args[1]) {
+        print('USAGE: man [command]', 'err');
+        print('Type "help" for a full command listing.', 'dim');
+        break;
+      }
+      printUsage(args[1]);
       break;
 
     // ── DIFF ──────────────────────────────────────────────────────────────
@@ -2407,18 +2840,15 @@ async function processCommand(raw) {
 
     // ── NANO ──────────────────────────────────────────────────────────────
     case 'nano': {
-      if (!args[1]) { print('USAGE: nano [file]', 'err'); break; }
-      if (!state.hasWifi && !isSystemFile(args[1])) { print('ERR: NO NETWORK ACCESS.', 'err'); break; }
-      if (!files[args[1]]) {
-        // Create blank file on open if it doesn't exist (requires admin for sys names)
-        if (isSystemFile(args[1]) && !state.admin) { print('ERR: ROOT REQUIRED TO EDIT SYSTEM FILES.', 'err'); break; }
-        files[args[1]] = '';
-        saveFiles();
-      }
-      if (isSystemFile(args[1]) && !state.admin) { print('ERR: ROOT REQUIRED TO EDIT SYSTEM FILES.', 'err'); break; }
-      await typePrint(`OPENING ${args[1]} IN NANO...`, 'sys');
-      await sleep(200);
-      nanoOpen(args[1]);
+      if (!args[1]) { printUsage('nano'); break; }
+      const { name: nanoName, dir: nanoDir } = resolveFile(args[1]);
+      if (!dirs.includes(nanoDir)) { print(`ERR: Directory '${nanoDir}' does not exist.`, 'err'); break; }
+      if (!canWrite(nanoDir)) { print(`ERR: Permission denied — '${nanoDir}' requires ROOT.`, 'err'); break; }
+      if (isSystemFile(nanoName) && !state.admin) { print(`ERR: ROOT required to edit system files.`, 'err'); break; }
+      if (!files[nanoName]) { files[nanoName] = ''; fileLocations[nanoName] = nanoDir; saveFiles(); saveLocs(); }
+      await typePrint(`OPENING ${nanoDir}/${nanoName}...`, 'sys');
+      await sleep(150);
+      nanoOpen(nanoName);
       break;
     }
 
@@ -2607,11 +3037,15 @@ async function processCommand(raw) {
       localStorage.removeItem('tscpp_history');
       localStorage.removeItem('tscpp_macros');
       localStorage.removeItem('tscpp_theme');
+      localStorage.removeItem('tscpp_dirs');
+      localStorage.removeItem('tscpp_locs');
+      localStorage.removeItem('tscpp_master_key');
+      localStorage.removeItem('tscpp_root_key');
 
       // Reset to factory
       Object.keys(files).forEach(k => delete files[k]);
       Object.assign(files, {
-        "welcome.txt": "TSCPP Terminal v6.0 — Connection required for cloud sync.",
+        "welcome.txt": "TSCPP Terminal v7.0 — Connection required for cloud sync.",
         "note.txt":    "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
         "readme.md":   "Welcome agent. Type HELP for command reference.",
       }, SYSTEM_FILES);
@@ -2636,9 +3070,9 @@ async function processCommand(raw) {
       await sleep(300);
       print('', '');
       print('╔══════════════════════════════════════════════════════════╗', 'sys');
-      print('║  TSCPP OS REINSTALL SUCCESSFUL                           ║', 'sys');
-      print('║  All systems restored. All user data erased.             ║', 'sys');
-      print('║  Rebooting terminal...                                   ║', 'sys');
+      print('║  TSCPP OS REINSTALL SUCCESSFUL                          ║', 'sys');
+      print('║  All systems restored. All user data erased.            ║', 'sys');
+      print('║  Rebooting terminal...                                  ║', 'sys');
       print('╚══════════════════════════════════════════════════════════╝', 'sys');
       await sleep(1800);
       window.location.reload();
@@ -2683,9 +3117,6 @@ cmdInput.addEventListener('keydown', function pw(e) {
     cmdInput.type = 'text';
   }
 });
-
-// Init
-document.getElementById('lock-input').focus();
 </script>
 </body>
 </html>
