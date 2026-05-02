@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSCPP Advanced Terminal v5.0</title>
+<title>TSCPP Advanced Terminal v6.0</title>
 <link rel="icon" type="image/png" href="TSCPP.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
@@ -339,6 +339,133 @@
   .lock-bar:nth-child(5) { height: 6px; animation-delay: 0.3s; }
   @keyframes lb { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.3)} }
 
+  /* ── THEMES ────────────────────────────────────────────────────────────── */
+  body.theme-amber {
+    --green: #ffaa00; --green-dim: #cc8800; --green-dark: #3d2800;
+    --bg: #0a0700; --surface: #120e00; --border: #2e2000;
+    --cyan: #ffcc44;
+  }
+  body.theme-red {
+    --green: #ff4444; --green-dim: #cc2222; --green-dark: #3d0000;
+    --bg: #0a0000; --surface: #120000; --border: #2e0000;
+    --cyan: #ff8866;
+  }
+  body.theme-blue {
+    --green: #00ccff; --green-dim: #0099cc; --green-dark: #002233;
+    --bg: #00060a; --surface: #000e14; --border: #001e2e;
+    --cyan: #44eeff;
+  }
+  body.theme-ice {
+    --green: #cce8ff; --green-dim: #99ccee; --green-dark: #1a3344;
+    --bg: #050810; --surface: #080e18; --border: #101e2e;
+    --cyan: #ffffff;
+  }
+  body.theme-phosphor {
+    --green: #c8ff80; --green-dim: #a0d060; --green-dark: #1e3300;
+    --bg: #030800; --surface: #060f00; --border: #142200;
+    --cyan: #eeffaa;
+  }
+
+  /* ── NANO EDITOR ────────────────────────────────────────────────────────── */
+  #nano-overlay {
+    position: fixed; inset: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    font-size: 14px;
+  }
+  #nano-overlay.hidden { display: none; }
+  #nano-titlebar {
+    background: var(--green-dim);
+    color: var(--bg);
+    text-align: center;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 2px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #nano-filename { font-weight: 700; }
+  #nano-modified-flag { font-size: 10px; opacity: 0.8; }
+  #nano-body {
+    flex: 1;
+    background: var(--bg);
+    color: var(--green);
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.7;
+    caret-color: var(--green);
+    overflow-y: auto;
+  }
+  #nano-body::selection { background: var(--green-dark); color: var(--green); }
+  #nano-body::-webkit-scrollbar { width: 4px; }
+  #nano-body::-webkit-scrollbar-thumb { background: var(--green-dark); }
+  #nano-statusbar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 4px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .nano-key {
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--bg);
+    background: var(--green-dim);
+    margin: 2px 4px;
+    letter-spacing: 1px;
+  }
+  .nano-key span { color: var(--bg); opacity: 0.75; margin-left: 4px; font-size: 10px; }
+  #nano-info {
+    padding: 3px 12px;
+    font-size: 10px;
+    color: var(--green-dark);
+    display: flex;
+    gap: 20px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #nano-info span { color: var(--green-dim); }
+
+  /* ── TOAST NOTIFICATIONS ─────────────────────────────────────────────── */
+  #toast-container {
+    position: fixed;
+    bottom: 60px;
+    right: 16px;
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--green-dim);
+    font-size: 11px;
+    padding: 6px 12px;
+    letter-spacing: 1px;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.2s, transform 0.2s;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .toast.show { opacity: 1; transform: translateX(0); }
+  .toast.ok   { border-color: var(--green-dim); color: var(--green); }
+  .toast.warn { border-color: var(--amber); color: var(--amber); }
+  .toast.err  { border-color: var(--red); color: var(--red); }
+
   /* Hardware failure effects */
   @keyframes glitch-h {
     0%   { transform: translate(0); }
@@ -405,6 +532,30 @@
 <div id="beam"></div>
 <div id="alert-overlay"></div>
 <div id="hw-overlay"></div>
+<div id="toast-container"></div>
+
+<!-- Nano Editor Overlay -->
+<div id="nano-overlay" class="hidden">
+  <div id="nano-titlebar">
+    <span style="opacity:0.5;font-size:10px;">TSCPP NANO EDITOR</span>
+    <span id="nano-filename">untitled</span>
+    <span id="nano-modified-flag"></span>
+  </div>
+  <textarea id="nano-body" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+  <div id="nano-info">
+    <span>LINE: <span id="nano-line">1</span></span>
+    <span>COL: <span id="nano-col">1</span></span>
+    <span>CHARS: <span id="nano-chars">0</span></span>
+    <span id="nano-sys-warn" style="color:var(--amber);display:none;">⚠ SYSTEM FILE — EDIT WITH CAUTION</span>
+  </div>
+  <div id="nano-statusbar">
+    <div class="nano-key">^S<span>SAVE</span></div>
+    <div class="nano-key">^X<span>EXIT</span></div>
+    <div class="nano-key">^Z<span>UNDO</span></div>
+    <div class="nano-key">^A<span>SELECT ALL</span></div>
+    <div class="nano-key">^R<span>RESTORE ORIGINAL</span></div>
+  </div>
+</div>
 
 <!-- Lock Screen -->
 <div id="lockscreen">
@@ -412,7 +563,7 @@
     <div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div>
   </div>
   <div class="lock-logo">TSCPP</div>
-  <div class="lock-sub">ADVANCED TERMINAL v5.0</div>
+  <div class="lock-sub">ADVANCED TERMINAL v6.0</div>
   <div class="lock-input-wrap" id="lock-wrap">
     <span style="color:#1e3e1e;font-size:11px;">KEY:</span>
     <input type="password" id="lock-input" autofocus autocomplete="off" placeholder="ENTER ACCESS KEY">
@@ -522,27 +673,36 @@
 const MASTER_KEY = "TSCPP-1993";
 const ROOT_KEY   = "Secret@Agent983";
 
+const _s = JSON.parse(localStorage.getItem('tscpp_state') || 'null') || {};
 let state = {
-  locked: true,
-  admin: false,
-  waitingPw: false,
-  waitingInput: null,  // { prompt, resolve }
-  hasWifi: false,
-  wifiAdmin: false,
-  tunnelActive: false,
-  currentServer: "LOCAL",
-  hackAttempts: 0,
-  traceRisk: 0,
-  tabCount: 1,
-  activeTab: 0,
-  sidebarOpen: true,
-  minimapOpen: true,
+  locked:          true,
+  admin:           _s.admin           ?? false,
+  waitingPw:       false,
+  waitingInput:    null,
+  hasWifi:         _s.hasWifi         ?? false,
+  wifiAdmin:       _s.wifiAdmin       ?? false,
+  tunnelActive:    _s.tunnelActive    ?? false,
+  currentServer:   _s.currentServer   ?? "LOCAL",
+  hackAttempts:    _s.hackAttempts    ?? 0,
+  traceRisk:       _s.traceRisk       ?? 0,
+  tabCount:        _s.tabCount        ?? 1,
+  activeTab:       _s.activeTab       ?? 0,
+  sidebarOpen:     _s.sidebarOpen     ?? true,
+  minimapOpen:     _s.minimapOpen     ?? true,
+  cwd:             _s.cwd             ?? '/home/agent',
   multilineBuffer: null,
   thermalThrottle: false,
 };
 
-let cmdHistory = [];
-let historyIdx  = -1;
+function saveState() {
+  const { locked, waitingPw, waitingInput, multilineBuffer, thermalThrottle, ...keep } = state;
+  localStorage.setItem('tscpp_state', JSON.stringify(keep));
+}
+
+let cmdHistory = JSON.parse(localStorage.getItem('tscpp_history') || '[]');
+let historyIdx  = cmdHistory.length;
+
+function saveHistory() { localStorage.setItem('tscpp_history', JSON.stringify(cmdHistory.slice(-200))); }
 
 // ─── SYSTEM FILES (never stored in localStorage — always regenerated) ─────────
 const SYSTEM_FILES = {
@@ -602,13 +762,208 @@ const FILE_CONSEQUENCES = {
 };
 
 let files = JSON.parse(localStorage.getItem('tscpp_files') || 'null') || {
-  "welcome.txt":  "TSCPP Terminal v5.0 — Connection required for cloud sync.",
+  "welcome.txt":  "TSCPP Terminal v6.0 — Connection required for cloud sync.",
   "note.txt":     "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
   "readme.md":    "Welcome agent. Type HELP for command reference.",
 };
 // Merge system files in (don't overwrite if user already has them)
 Object.assign(files, ...Object.entries(SYSTEM_FILES).filter(([k])=>!(k in files)).map(([k,v])=>({[k]:v})));
 function saveFiles() { localStorage.setItem('tscpp_files', JSON.stringify(files)); }
+
+// ─── DIRECTORY TREE ───────────────────────────────────────────────────────────
+let dirs = JSON.parse(localStorage.getItem('tscpp_dirs') || 'null') ||
+  ['/','home','/home/agent','/sys','/etc','/var','/var/log','/tmp','/root'];
+function saveDirs() { localStorage.setItem('tscpp_dirs', JSON.stringify(dirs)); }
+
+// Where each file lives. Persisted so user-created files keep their location.
+const DEFAULT_LOCATIONS = {
+  'kernel.cfg':'/sys','firewall.rules':'/sys','auth.db':'/sys',
+  'network.conf':'/sys','enc_keys.dat':'/sys','boot.cfg':'/sys',
+  'sys.log':'/var/log',
+  'hosts':'/etc','cron.dat':'/etc','passwd':'/etc',
+  'welcome.txt':'/home/agent','note.txt':'/home/agent','readme.md':'/home/agent',
+};
+let fileLocations = JSON.parse(localStorage.getItem('tscpp_locs') || 'null') || { ...DEFAULT_LOCATIONS };
+function saveLocs() { localStorage.setItem('tscpp_locs', JSON.stringify(fileLocations)); }
+
+// Directory read/write permissions
+const DIR_PERMS = {
+  '/':           { r:'all',  w:'root' },
+  '/home':       { r:'all',  w:'root' },
+  '/home/agent': { r:'all',  w:'all'  },
+  '/sys':        { r:'all',  w:'root' },
+  '/etc':        { r:'all',  w:'root' },
+  '/var':        { r:'all',  w:'root' },
+  '/var/log':    { r:'all',  w:'root' },
+  '/tmp':        { r:'all',  w:'all'  },
+  '/root':       { r:'root', w:'root' },
+};
+
+function canRead(dir)  { const p=DIR_PERMS[dir]||{r:'all',w:'all'}; return p.r==='all'||state.admin; }
+function canWrite(dir) { const p=DIR_PERMS[dir]||{r:'all',w:'all'}; return p.w==='all'||state.admin; }
+
+function normPath(p) {
+  // Resolve a path relative to cwd; clean up // and trailing /
+  if (!p) return state.cwd;
+  const base = p.startsWith('/') ? p : state.cwd + '/' + p;
+  const parts = base.split('/').filter(Boolean);
+  const stack = [];
+  for (const part of parts) {
+    if (part === '..') stack.pop();
+    else if (part !== '.') stack.push(part);
+  }
+  return '/' + stack.join('/') || '/';
+}
+
+function filesInDir(dir) {
+  return Object.keys(files).filter(f => (fileLocations[f] || '/home/agent') === dir);
+}
+
+// Resolve "note.txt", "/home/agent/note.txt", or "/sys/kernel.cfg" → { name, dir }
+function resolveFile(arg) {
+  if (!arg) return null;
+  if (arg.includes('/')) {
+    const dir  = arg.substring(0, arg.lastIndexOf('/')) || '/';
+    const name = arg.substring(arg.lastIndexOf('/') + 1);
+    return { name, dir: normPath(dir) };
+  }
+  // bare name — look in cwd first, then search all dirs
+  if (files[arg] && (fileLocations[arg]||'/home/agent') === state.cwd) return { name:arg, dir:state.cwd };
+  if (files[arg]) return { name:arg, dir:fileLocations[arg]||'/home/agent' };
+  return { name:arg, dir:state.cwd }; // doesn't exist yet — will go in cwd
+}
+
+// ─── CMD_HELP (usage explanations) ───────────────────────────────────────────
+const CMD_HELP = {
+  help:         { desc:'List all commands or get help on one',     usage:'help [command]',              ex:['help','help cat','help hack'] },
+  clear:        { desc:'Clear the terminal output',                usage:'clear',                       ex:['clear'] },
+  panic:        { desc:'Emergency: sever all connections and purge logs', usage:'panic',               ex:['panic'] },
+  reboot:       { desc:'Reboot and lock the terminal',             usage:'reboot',                      ex:['reboot'] },
+  echo:         { desc:'Print text to the terminal',               usage:'echo [text]',                 ex:['echo HELLO WORLD'] },
+  date:         { desc:'Show current system date and time',        usage:'date',                        ex:['date'] },
+  uptime:       { desc:'Show how long the terminal has been running', usage:'uptime',                  ex:['uptime'] },
+  history:      { desc:'Show command history',                     usage:'history',                     ex:['history'] },
+  env:          { desc:'Print current environment variables',      usage:'env',                         ex:['env'] },
+  alias:        { desc:'Register a command alias',                 usage:'alias [name] [command]',      ex:['alias h help','alias sc scan'] },
+  login:        { desc:'Authenticate as root',                     usage:'login',                       ex:['login'] },
+  logout:       { desc:'End root session',                         usage:'logout',                      ex:['logout'] },
+  whoami:       { desc:'Show current user identity',               usage:'whoami',                      ex:['whoami'] },
+  status:       { desc:'Show full session status',                 usage:'status',                      ex:['status'] },
+  pwd:          { desc:'Print current working directory',          usage:'pwd',                         ex:['pwd'] },
+  cd:           { desc:'Change working directory',                 usage:'cd [path]',                   ex:['cd /sys','cd /tmp','cd ..','cd /home/agent'] },
+  ls:           { desc:'List files in current or given directory', usage:'ls [path]',                   ex:['ls','ls /sys','ls /etc','ls /var/log','ls /tmp'] },
+  mkdir:        { desc:'Create a new directory',                   usage:'mkdir [path]',                ex:['mkdir /tmp/work','mkdir /home/agent/docs'] },
+  rmdir:        { desc:'Remove an empty directory',                usage:'rmdir [path]',                ex:['rmdir /tmp/work'] },
+  cat:          { desc:'Display contents of a file',               usage:'cat [file]',                  ex:['cat note.txt','cat /sys/kernel.cfg','cat /etc/hosts'] },
+  nano:         { desc:'Open a file in the nano text editor',      usage:'nano [file]',                 ex:['nano note.txt','nano /tmp/plan.txt'] },
+  write:        { desc:'Write text directly to a file (overwrites)', usage:'write [file] [text]',       ex:['write /tmp/x.txt hello world','write note.txt updated'] },
+  erase:        { desc:'Delete a file (prompts for system files)', usage:'erase [file]',                ex:['erase /tmp/x.txt','erase note.txt'] },
+  rename:       { desc:'Rename a file',                            usage:'rename [old] [new]',          ex:['rename note.txt notes_old.txt'] },
+  find:         { desc:'Search for files by name fragment',        usage:'find [term]',                 ex:['find .txt','find kernel','find log'] },
+  grep:         { desc:'Search for text inside a file',            usage:'grep [term] [file]',          ex:['grep ALLOW /etc/firewall.rules','grep root /etc/passwd'] },
+  diff:         { desc:'Compare contents of two files',            usage:'diff [file1] [file2]',        ex:['diff note.txt readme.md'] },
+  chmod:        { desc:'Change file permissions (root only)',       usage:'chmod [file] [perms]',        ex:['chmod /tmp/x.txt 777','chmod note.txt 644'] },
+  zip:          { desc:'Compress a file',                          usage:'zip [file]',                  ex:['zip note.txt'] },
+  unzip:        { desc:'Decompress a file',                        usage:'unzip [file]',                ex:['unzip note.txt.gz'] },
+  download:     { desc:'Export a file to your device (root only)', usage:'download [file]',             ex:['download note.txt'] },
+  scan:         { desc:'Scan for nearby wireless networks',        usage:'scan',                        ex:['scan'] },
+  hack:         { desc:'Attempt to hack a scanned network by ID',  usage:'hack [id]',                   ex:['hack 01','hack 06'] },
+  'wifi-override':{ desc:'Escalate to wifi-admin after hacking',   usage:'wifi-override',               ex:['wifi-override'] },
+  tunnel:       { desc:'Open a tunnel to a remote IP (requires wifi-override)', usage:'tunnel [ip]',   ex:['tunnel 10.0.0.5','tunnel 192.168.1.1'] },
+  ping:         { desc:'Send ICMP echo requests to a host',        usage:'ping [host]',                 ex:['ping 8.8.8.8','ping 10.0.0.1'] },
+  trace:        { desc:'Trace the route to a host',                usage:'trace [host]',                ex:['trace 10.0.0.1','trace tscpp-hq'] },
+  netstat:      { desc:'Show active network connections',          usage:'netstat',                     ex:['netstat'] },
+  portmap:      { desc:'Scan open ports on a host',                usage:'portmap [ip]',                ex:['portmap','portmap 10.0.0.5'] },
+  nmap:         { desc:'Deep OS/vulnerability scan (requires uplink)', usage:'nmap [ip]',              ex:['nmap 10.0.0.5'] },
+  sniff:        { desc:'Capture live network packets (requires uplink)', usage:'sniff',               ex:['sniff'] },
+  arp:          { desc:'Show ARP table',                           usage:'arp',                         ex:['arp'] },
+  spoof:        { desc:'Spoof IP/MAC identity (requires wifi-override)', usage:'spoof [ip]',           ex:['spoof 10.0.0.1'] },
+  bruteforce:   { desc:'Run a brute-force credential attack',      usage:'bruteforce [target]',         ex:['bruteforce 10.0.0.5'] },
+  inject:       { desc:'Inject a payload into the network (requires wifi-override)', usage:'inject [target]', ex:['inject 10.0.0.5'] },
+  keylog:       { desc:'Start/stop keystroke capture (root only)', usage:'keylog [start|stop]',         ex:['keylog start','keylog stop'] },
+  crack:        { desc:'Attempt to crack a password hash',         usage:'crack [hash]',                ex:['crack 5f4dcc3b5aa765d61d8327deb882cf99'] },
+  decrypt:      { desc:'Decrypt a base64-encoded string',          usage:'decrypt [text]',              ex:['decrypt SGVsbG8='] },
+  exfil:        { desc:'Exfiltrate a file over a covert channel (root only)', usage:'exfil [file]',   ex:['exfil /sys/auth.db'] },
+  firewall:     { desc:'Enable or disable the firewall',           usage:'firewall [on|off]',           ex:['firewall on','firewall off'] },
+  vpn:          { desc:'Connect or disconnect VPN (reduces trace risk)', usage:'vpn [on|off]',         ex:['vpn on','vpn off'] },
+  proxy:        { desc:'Route traffic through a proxy IP',         usage:'proxy [ip]',                  ex:['proxy 10.9.9.9'] },
+  locate:       { desc:'GPS-triangulate a target (root only)',     usage:'locate',                      ex:['locate'] },
+  ps:           { desc:'List running processes (root only)',        usage:'ps',                          ex:['ps'] },
+  kill:         { desc:'Terminate a process by PID (root only)',   usage:'kill [pid]',                  ex:['kill 1234'] },
+  sysinfo:      { desc:'Show full system hardware info',           usage:'sysinfo',                     ex:['sysinfo'] },
+  encode:       { desc:'Base64-encode a string (root only)',       usage:'encode [text]',               ex:['encode hello world'] },
+  decode:       { desc:'Base64-decode a string (root only)',       usage:'decode [text]',               ex:['decode SGVsbG8='] },
+  matrix:       { desc:'Display the matrix (requires uplink)',     usage:'matrix',                      ex:['matrix'] },
+  connect:      { desc:'Connect to the TSCPP main terminal',       usage:'connect tscpp main',          ex:['connect tscpp main'] },
+  sidebar:      { desc:'Toggle the sidebar panel',                 usage:'sidebar',                     ex:['sidebar'] },
+  minimap:      { desc:'Toggle the network minimap panel',         usage:'minimap',                     ex:['minimap'] },
+  syshealth:    { desc:'Run a full system health diagnostic',      usage:'syshealth',                   ex:['syshealth'] },
+  restore:      { desc:'Restore a system file from backup (root only)', usage:'restore [file]',         ex:['restore kernel.cfg','restore /etc/passwd'] },
+  'os-reinstall':{ desc:'Full OS wipe and reinstall (root only — DESTRUCTIVE)', usage:'os-reinstall',  ex:['os-reinstall'] },
+  nano:         { desc:'Open a file in the nano editor',           usage:'nano [file]',                 ex:['nano note.txt','nano /tmp/x.txt'] },
+  theme:        { desc:'Change the terminal colour theme',         usage:'theme [name]',                ex:['theme amber','theme blue','theme red','theme ice'] },
+  macro:        { desc:'Record and replay command sequences',      usage:'macro [list|record|stop|run|delete] [name]', ex:['macro record myflow','macro stop','macro run myflow','macro list'] },
+  man:          { desc:'Show the manual page for a command',       usage:'man [command]',               ex:['man hack','man ls','man tunnel'] },
+};
+
+function printUsage(cmd) {
+  const h = CMD_HELP[cmd];
+  if (!h) { print(`No manual entry for '${cmd}'.`, 'warn'); return; }
+  print('', '');
+  print(`┌─ ${cmd.toUpperCase()} ${'─'.repeat(Math.max(0,50-cmd.length-2))}┐`, 'sep');
+  print(`│  ${h.desc}`, 'sys');
+  print(`│`, 'sep');
+  print(`│  USAGE:    ${h.usage}`, 'admin');
+  if (h.ex?.length) {
+    print(`│  EXAMPLES:`, 'sep');
+    h.ex.forEach(e => print(`│    ${e}`, 'dim'));
+  }
+  print(`└${'─'.repeat(52)}┘`, 'sep');
+  print('', '');
+}
+
+// ─── SESSION TIMEOUT ─────────────────────────────────────────────────────────
+let lastActivity = Date.now();
+let timeoutWarned = false;
+const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const TIMEOUT_WARN_MS    = 4.5 * 60 * 1000; // warn at 4:30
+
+document.addEventListener('keydown', () => {
+  lastActivity  = Date.now();
+  timeoutWarned = false;
+});
+
+setInterval(() => {
+  if (state.locked) return;
+  const idle = Date.now() - lastActivity;
+  if (!timeoutWarned && idle >= TIMEOUT_WARN_MS) {
+    timeoutWarned = true;
+    toast('SESSION IDLE — LOCKING IN 30s', 'warn', 5000);
+  }
+  if (idle >= SESSION_TIMEOUT_MS) {
+    sessionLockout();
+  }
+}, 10000);
+
+function sessionLockout() {
+  // Save state before locking
+  state.admin = false;
+  saveState();
+  state.locked = true;
+  output.innerHTML = '';
+  // Show lock screen again
+  const ls = document.getElementById('lockscreen');
+  ls.classList.remove('hidden');
+  document.getElementById('lock-input').value = '';
+  document.getElementById('lock-input').focus();
+  // Flash a message underneath briefly
+  const msg = document.createElement('div');
+  msg.style.cssText = 'position:absolute;bottom:80px;font-size:11px;color:var(--red);letter-spacing:2px;font-family:Orbitron,monospace;';
+  msg.textContent = 'SESSION TIMED OUT — RE-AUTHENTICATE';
+  ls.appendChild(msg);
+  lastActivity  = Date.now();
+  timeoutWarned = false;
+}
 
 // ─── SYSTEM HEALTH ────────────────────────────────────────────────────────────
 let sysHealth = JSON.parse(localStorage.getItem('tscpp_health') || 'null') || {
@@ -653,7 +1008,7 @@ const COMMANDS = [
   'inject','sniff','spoof','bruteforce','keylog','arp','nmap','exfil','crack',
   'firewall','vpn','proxy','encode','decode','env','alias','history','echo',
   'date','uptime','kill','ps','chmod','find','grep','diff','zip','unzip',
-  'sidebar','minimap',
+  'sidebar','minimap','syshealth','restore','os-reinstall','nano','theme','macro',
 ];
 
 // ─── UTILITIES ───────────────────────────────────────────────────────────────
@@ -712,6 +1067,175 @@ function printTable(headers, rows, cls='') {
   print(headers.map((_,i)=>'-'.repeat(colW[i])).join('  '), 'sep');
   rows.forEach(r => print(fmt(r), cls));
 }
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, type='ok', duration=2500) {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  requestAnimationFrame(() => { requestAnimationFrame(() => el.classList.add('show')); });
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+// ─── THEME ───────────────────────────────────────────────────────────────────
+const THEMES = {
+  green:    { label: 'GREEN PHOSPHOR (DEFAULT)', class: '' },
+  amber:    { label: 'AMBER PHOSPHOR',           class: 'theme-amber' },
+  red:      { label: 'RED ALERT',                class: 'theme-red' },
+  blue:     { label: 'ARCTIC BLUE',              class: 'theme-blue' },
+  ice:      { label: 'ICE WHITE',                class: 'theme-ice' },
+  phosphor: { label: 'YELLOW PHOSPHOR',          class: 'theme-phosphor' },
+};
+
+function applyTheme(name) {
+  const t = THEMES[name];
+  if (!t) return false;
+  // Remove all theme classes
+  Object.values(THEMES).forEach(th => { if (th.class) document.body.classList.remove(th.class); });
+  if (t.class) document.body.classList.add(t.class);
+  localStorage.setItem('tscpp_theme', name);
+  return true;
+}
+
+// Restore theme on load
+(function() {
+  const saved = localStorage.getItem('tscpp_theme');
+  if (saved && THEMES[saved]) applyTheme(saved);
+})();
+
+// ─── NANO EDITOR ─────────────────────────────────────────────────────────────
+const nanoOverlay  = document.getElementById('nano-overlay');
+const nanoBody     = document.getElementById('nano-body');
+const nanoFilename = document.getElementById('nano-filename');
+const nanoModified = document.getElementById('nano-modified-flag');
+const nanoSysWarn  = document.getElementById('nano-sys-warn');
+const nanoLine     = document.getElementById('nano-line');
+const nanoCol      = document.getElementById('nano-col');
+const nanoChars    = document.getElementById('nano-chars');
+
+let nanoState = { file: null, original: '', modified: false, undoStack: [] };
+
+function nanoOpen(filename) {
+  const content = files[filename] ?? '';
+  nanoState = { file: filename, original: content, modified: false, undoStack: [] };
+  nanoFilename.textContent = filename;
+  nanoModified.textContent = '';
+  nanoBody.value = content;
+  nanoSysWarn.style.display = isSystemFile(filename) ? 'inline' : 'none';
+  nanoChars.textContent = content.length;
+  nanoLine.textContent = '1';
+  nanoCol.textContent  = '1';
+  nanoOverlay.classList.remove('hidden');
+  nanoBody.focus();
+}
+
+function nanoClose() {
+  nanoOverlay.classList.add('hidden');
+  cmdInput.focus();
+}
+
+async function nanoSave() {
+  const content = nanoBody.value;
+  const fname   = nanoState.file;
+  files[fname]  = content;
+  saveFiles();
+  nanoState.original = content;
+  nanoState.modified = false;
+  nanoModified.textContent = '';
+  toast(`SAVED: ${fname}`, 'ok');
+
+  // Apply system file consequences if needed
+  if (isSystemFile(fname)) {
+    const orig     = SYSTEM_FILES[fname] || '';
+    const origKeys = orig.split('\n').map(l => l.split('=')[0].trim()).filter(Boolean);
+    const missing  = origKeys.filter(k => !content.includes(k));
+    if (missing.length > 0 || content.length < orig.length * 0.4) {
+      nanoClose();
+      await applyFileConsequence(fname, 'corrupt');
+    } else {
+      (FILE_CONSEQUENCES[fname]?.erase?.effects || []).forEach(e => { sysHealth[e] = true; });
+      saveSysHealth();
+      toast('SYSTEM FILE INTEGRITY OK', 'ok');
+    }
+  }
+}
+
+// Update line/col/chars display while typing
+nanoBody.addEventListener('input', () => {
+  if (!nanoState.modified) {
+    nanoState.modified = true;
+    nanoModified.textContent = '  [MODIFIED]';
+  }
+  nanoChars.textContent = nanoBody.value.length;
+});
+
+nanoBody.addEventListener('keyup', updateNanoCursor);
+nanoBody.addEventListener('click', updateNanoCursor);
+
+function updateNanoCursor() {
+  const txt   = nanoBody.value.substring(0, nanoBody.selectionStart);
+  const lines = txt.split('\n');
+  nanoLine.textContent = lines.length;
+  nanoCol.textContent  = lines[lines.length - 1].length + 1;
+}
+
+nanoBody.addEventListener('keydown', async (e) => {
+  // Ctrl+S — save
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault();
+    await nanoSave();
+    return;
+  }
+  // Ctrl+X — exit (prompt if unsaved)
+  if (e.ctrlKey && e.key === 'x') {
+    e.preventDefault();
+    if (nanoState.modified) {
+      const confirmed = window.confirm(`'${nanoState.file}' has unsaved changes.\nSave before exiting?`);
+      if (confirmed) await nanoSave();
+    }
+    nanoClose();
+    return;
+  }
+  // Ctrl+Z — undo (native textarea undo works, just update modified flag)
+  if (e.ctrlKey && e.key === 'z') {
+    setTimeout(() => {
+      nanoState.modified = nanoBody.value !== nanoState.original;
+      nanoModified.textContent = nanoState.modified ? '  [MODIFIED]' : '';
+      nanoChars.textContent = nanoBody.value.length;
+    }, 0);
+    return;
+  }
+  // Ctrl+R — restore original content
+  if (e.ctrlKey && e.key === 'r') {
+    e.preventDefault();
+    const src = isSystemFile(nanoState.file) ? SYSTEM_FILES[nanoState.file] : nanoState.original;
+    nanoBody.value = src || '';
+    nanoState.modified = false;
+    nanoModified.textContent = '';
+    nanoChars.textContent = nanoBody.value.length;
+    toast('CONTENT RESTORED', 'warn');
+    return;
+  }
+  // Tab — insert 2 spaces instead of focusing away
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = nanoBody.selectionStart, end = nanoBody.selectionEnd;
+    nanoBody.value = nanoBody.value.substring(0, s) + '  ' + nanoBody.value.substring(end);
+    nanoBody.selectionStart = nanoBody.selectionEnd = s + 2;
+    return;
+  }
+});
+
+// ─── MACRO SYSTEM ────────────────────────────────────────────────────────────
+let macros      = JSON.parse(localStorage.getItem('tscpp_macros') || '{}');
+let macroRecord = null; // { name, commands[] } when recording
+
+function saveMacros() { localStorage.setItem('tscpp_macros', JSON.stringify(macros)); }
 
 // ─── MP LOG ──────────────────────────────────────────────────────────────────
 function mpLog(text, cls) {
@@ -783,6 +1307,7 @@ function updateRisk() {
   document.getElementById('tr-pct').textContent = pct+'%';
   document.getElementById('tr-fill').style.width = pct+'%';
   alertOverlay.className = pct >= 70 ? 'active' : '';
+  saveState();
 }
 
 function bumpRisk(amt) {
@@ -1100,7 +1625,7 @@ cmdInput.addEventListener('keydown', async (e) => {
       }
       return;
     }
-    if (val) { cmdHistory.push(val); historyIdx = cmdHistory.length; await processCommand(val); }
+    if (val) { cmdHistory.push(val); historyIdx = cmdHistory.length; saveHistory(); await processCommand(val); }
   }
 });
 
@@ -1126,8 +1651,17 @@ async function bootSequence() {
   output.innerHTML = '';
   buildMap();
 
+  // Restore sidebar/minimap panel visibility from saved state
+  if (!state.sidebarOpen) document.getElementById('sidebar').className = 'collapsed';
+  if (!state.minimapOpen) document.getElementById('minimap-panel').className = 'hidden';
+
+  // Restore progress bars
+  if (!sysHealth.firewall) { document.getElementById('fw-pct').textContent='0%'; document.getElementById('fw-fill').style.width='0%'; }
+  if (!sysHealth.encryption) { document.getElementById('enc-pct').textContent='0%'; document.getElementById('enc-fill').style.width='0%'; }
+  updateRisk();
+
   const lines = [
-    ['>> TSCPP BIOS v5.0 — INITIALIZING...','sys'],
+    ['>> TSCPP BIOS v6.0 — INITIALIZING...','sys'],
     ['>> CPU CHECK........ [ 8-CORE / 4.2GHz ]  [ OK ]','sys'],
     ['>> RAM CHECK........ [ 32GB DDR5 ECC ]     [ OK ]','sys'],
     ['>> DISK CHECK....... [ 2TB NVME RAID-1 ]   [ OK ]','sys'],
@@ -1147,6 +1681,17 @@ async function bootSequence() {
   for (const [text, cls] of lines) {
     await typePrint(text, cls, 8);
     await sleep(30);
+  }
+
+  // Warn if any system files are already damaged
+  const damaged = getInstability();
+  if (damaged > 0) {
+    await sleep(200);
+    print('', '');
+    print(`!! WARNING: ${damaged} DAMAGED SUBSYSTEM(S) DETECTED ON STARTUP !!`, 'err');
+    print('   Run "syshealth" for a full diagnostic report.', 'warn');
+    print('   Run "restore [file]" (ROOT) to recover damaged system files.', 'warn');
+    glitchScreen();
   }
 
   updatePrompt();
@@ -1170,6 +1715,7 @@ function updatePrompt() {
     threatBadge.textContent = 'THREAT: RESTRICTED';
     threatBadge.className   = '';
   }
+  saveState();
 }
 
 // ─── SIDEBAR / TAB HELPERS ───────────────────────────────────────────────────
@@ -1235,6 +1781,12 @@ async function processCommand(raw) {
   const args = raw.split(/\s+/);
   const cmd  = args[0].toLowerCase();
 
+  // If recording a macro, capture this command (skip macro commands themselves)
+  if (macroRecord && cmd !== 'macro') {
+    macroRecord.commands.push(raw);
+    toast(`REC [${macroRecord.commands.length}]: ${raw.substring(0,24)}`, 'warn', 1200);
+  }
+
   // echo the command
   const user = state.admin ? 'ROOT' : 'AGENT';
   const sym  = state.admin ? ':#' : ':~$';
@@ -1246,7 +1798,7 @@ async function processCommand(raw) {
     // ── HELP ──────────────────────────────────────────────────────────────
     case 'help': {
       printSep();
-      await typePrint('TSCPP TERMINAL v5.0 — COMMAND REFERENCE', 'sys', 6);
+      await typePrint('TSCPP TERMINAL v6.0 — COMMAND REFERENCE', 'sys', 6);
       printSep();
       const groups = [
         ['CORE',    ['help','clear','panic','reboot','echo [text]','date','uptime','history','env','alias [n] [cmd]']],
@@ -1254,8 +1806,8 @@ async function processCommand(raw) {
         ['NETWORK', ['scan','hack [id]','wifi-override','tunnel [ip]','ping [host]','trace [host]','netstat','portmap','nmap [ip]','sniff','arp','spoof [ip]']],
         ['FILES',   ['ls','cat [file]','write [file] [text]','erase [file]','rename [old] [new]','find [term]','grep [term] [file]','diff [f1] [f2]','chmod [file] [perm]','zip [file]','unzip [file]']],
         ['EXPLOIT', ['bruteforce [target]','inject [target]','keylog [start|stop]','crack [hash]','decrypt [text]','exfil [file]','firewall [on|off]','vpn [on|off]','proxy [ip]']],
-        ['ROOT',    ['locate','download [file]','encode [text]','decode [text]','ps','kill [pid]','sysinfo']],
-        ['TOOLS',   ['matrix','connect tscpp main','sidebar','minimap']],
+        ['ROOT',    ['locate','download [file]','encode [text]','decode [text]','ps','kill [pid]','sysinfo','restore [file]']],
+        ['TOOLS',   ['matrix','connect tscpp main','sidebar','minimap','syshealth','os-reinstall','nano [file]','theme [name]','macro [list|record|stop|run|delete]']],
       ];
       for (const [grp, cmds] of groups) {
         print('', '');
@@ -1615,7 +2167,21 @@ async function processCommand(raw) {
       if (!state.hasWifi) { print('ERR: NO NETWORK ACCESS.', 'err'); break; }
       const keys = Object.keys(files);
       if (!keys.length) { print('(empty)', 'dim'); break; }
-      printTable(['FILE','SIZE','PERMS'], keys.map(k=>[k, files[k].length+' B', state.admin?'rwxrwxrwx':'rw-r--r--']));
+      printTable(
+        ['FILE','TYPE','SIZE','PERMS','HEALTH'],
+        keys.map(k => {
+          const isSys = isSystemFile(k);
+          const effKey = FILE_CONSEQUENCES[k]?.erase?.effects?.[0];
+          const healthy = !effKey || sysHealth[effKey] !== false;
+          return [
+            k,
+            isSys ? '[SYS]' : '[USR]',
+            files[k].length + ' B',
+            isSys ? (state.admin ? 'rwx------' : 'r--------') : (state.admin ? 'rwxrwxrwx' : 'rw-r--r--'),
+            isSys ? (healthy ? 'OK' : '!! DAMAGED') : '--'
+          ];
+        })
+      );
       break;
     }
 
@@ -1634,9 +2200,29 @@ async function processCommand(raw) {
     case 'write':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
       if (args.length < 3) { print('USAGE: write [file] [text]', 'err'); break; }
-      files[args[1]] = args.slice(2).join(' ');
-      saveFiles();
-      await typePrint(`FILE '${args[1]}' SAVED (${files[args[1]].length} BYTES).`, 'admin');
+      {
+        const wName = args[1];
+        const newContent = args.slice(2).join(' ');
+        const isSys = isSystemFile(wName);
+        files[wName] = newContent;
+        saveFiles();
+        await typePrint(`FILE '${wName}' SAVED (${newContent.length} BYTES).`, 'admin');
+        if (isSys) {
+          const orig = SYSTEM_FILES[wName] || '';
+          const origKeys = orig.split('\n').map(l => l.split('=')[0].trim()).filter(Boolean);
+          const missingKeys = origKeys.filter(k => !newContent.includes(k));
+          if (missingKeys.length > 0 || newContent.length < orig.length * 0.4) {
+            await sleep(200);
+            await typePrint(`  WARNING: ${missingKeys.length} EXPECTED KEY(S) MISSING FROM SYSTEM FILE`, 'warn');
+            await applyFileConsequence(wName, 'corrupt');
+          } else {
+            // Restore health for this file's systems
+            (FILE_CONSEQUENCES[wName]?.erase?.effects || []).forEach(e => { sysHealth[e] = true; });
+            saveSysHealth();
+            await typePrint('SYSTEM FILE INTEGRITY CHECK PASSED — HEALTH RESTORED.', 'sys');
+          }
+        }
+      }
       break;
 
     // ── ERASE ─────────────────────────────────────────────────────────────
@@ -1810,6 +2396,105 @@ async function processCommand(raw) {
       } else { print('USAGE: connect tscpp main', 'err'); }
       break;
 
+    // ── NANO ──────────────────────────────────────────────────────────────
+    case 'nano': {
+      if (!args[1]) { print('USAGE: nano [file]', 'err'); break; }
+      if (!state.hasWifi && !isSystemFile(args[1])) { print('ERR: NO NETWORK ACCESS.', 'err'); break; }
+      if (!files[args[1]]) {
+        // Create blank file on open if it doesn't exist (requires admin for sys names)
+        if (isSystemFile(args[1]) && !state.admin) { print('ERR: ROOT REQUIRED TO EDIT SYSTEM FILES.', 'err'); break; }
+        files[args[1]] = '';
+        saveFiles();
+      }
+      if (isSystemFile(args[1]) && !state.admin) { print('ERR: ROOT REQUIRED TO EDIT SYSTEM FILES.', 'err'); break; }
+      await typePrint(`OPENING ${args[1]} IN NANO...`, 'sys');
+      await sleep(200);
+      nanoOpen(args[1]);
+      break;
+    }
+
+    // ── THEME ─────────────────────────────────────────────────────────────
+    case 'theme': {
+      if (!args[1]) {
+        printSep();
+        print('AVAILABLE THEMES:', 'sys');
+        const current = localStorage.getItem('tscpp_theme') || 'green';
+        Object.entries(THEMES).forEach(([key, t]) => {
+          print(`  ${key.padEnd(10)} — ${t.label}${key===current?' [ACTIVE]':''}`, key===current?'success':'');
+        });
+        printSep();
+        print('USAGE: theme [name]', 'dim');
+        break;
+      }
+      if (!THEMES[args[1]]) { print(`ERR: UNKNOWN THEME '${args[1]}'. TYPE 'theme' TO LIST OPTIONS.`, 'err'); break; }
+      applyTheme(args[1]);
+      await typePrint(`THEME APPLIED: ${THEMES[args[1]].label}`, 'success');
+      toast(`THEME: ${args[1].toUpperCase()}`, 'ok');
+      break;
+    }
+
+    // ── MACRO ─────────────────────────────────────────────────────────────
+    case 'macro': {
+      const sub = (args[1] || '').toLowerCase();
+
+      if (!sub || sub === 'list') {
+        const names = Object.keys(macros);
+        if (!names.length) { print('NO MACROS SAVED.  Usage: macro record [name]', 'dim'); break; }
+        printSep();
+        print('SAVED MACROS:', 'sys');
+        names.forEach(n => print(`  ${n.padEnd(16)} — ${macros[n].length} command(s): ${macros[n].join(' → ')}`, ''));
+        printSep();
+        break;
+      }
+
+      if (sub === 'record') {
+        if (!args[2]) { print('USAGE: macro record [name]', 'err'); break; }
+        if (macroRecord) { print(`ERR: ALREADY RECORDING '${macroRecord.name}'. Type 'macro stop' first.`, 'err'); break; }
+        macroRecord = { name: args[2], commands: [] };
+        await typePrint(`MACRO RECORDER STARTED — '${args[2]}'. Run commands. Type 'macro stop' to finish.`, 'admin');
+        toast(`REC: ${args[2]}`, 'warn');
+        break;
+      }
+
+      if (sub === 'stop') {
+        if (!macroRecord) { print('ERR: NOT CURRENTLY RECORDING.', 'err'); break; }
+        if (macroRecord.commands.length === 0) {
+          print('ERR: NO COMMANDS RECORDED — MACRO DISCARDED.', 'err');
+          macroRecord = null; break;
+        }
+        macros[macroRecord.name] = macroRecord.commands;
+        saveMacros();
+        await typePrint(`MACRO '${macroRecord.name}' SAVED — ${macroRecord.commands.length} COMMAND(S).`, 'success');
+        toast(`SAVED: ${macroRecord.name}`, 'ok');
+        macroRecord = null;
+        break;
+      }
+
+      if (sub === 'run') {
+        if (!args[2]) { print('USAGE: macro run [name]', 'err'); break; }
+        if (!macros[args[2]]) { print(`ERR: MACRO '${args[2]}' NOT FOUND.`, 'err'); break; }
+        await typePrint(`RUNNING MACRO '${args[2]}' (${macros[args[2]].length} commands)...`, 'sys');
+        for (const cmd of macros[args[2]]) {
+          await sleep(120);
+          await processCommand(cmd);
+        }
+        await typePrint(`MACRO '${args[2]}' COMPLETE.`, 'success');
+        break;
+      }
+
+      if (sub === 'delete') {
+        if (!args[2]) { print('USAGE: macro delete [name]', 'err'); break; }
+        if (!macros[args[2]]) { print(`ERR: MACRO '${args[2]}' NOT FOUND.`, 'err'); break; }
+        delete macros[args[2]];
+        saveMacros();
+        await typePrint(`MACRO '${args[2]}' DELETED.`, 'admin');
+        break;
+      }
+
+      print(`ERR: UNKNOWN SUBCOMMAND '${sub}'. Options: list, record, stop, run, delete`, 'err');
+      break;
+    }
+
     // ── SIDEBAR / MINIMAP TOGGLES ──────────────────────────────────────────
     case 'sidebar':
       state.sidebarOpen = !state.sidebarOpen;
@@ -1823,10 +2508,163 @@ async function processCommand(raw) {
       print(`MINIMAP: ${state.minimapOpen?'VISIBLE':'HIDDEN'}`, 'sys');
       break;
 
+    // ── SYSHEALTH ─────────────────────────────────────────────────────────
+    case 'syshealth': {
+      printSep();
+      await typePrint('SYSTEM HEALTH DIAGNOSTIC', 'sys', 6);
+      printSep();
+      const hwChance = Math.round(hwFailureChance() * 100);
+      const labels = {
+        kernel:'KERNEL', firewall:'FIREWALL', auth:'AUTH SYSTEM',
+        network:'NETWORK STACK', encryption:'ENCRYPTION ENGINE',
+        boot:'BOOT LOADER', log:'AUDIT LOGGER', hosts:'DNS/HOSTS', cron:'CRON SCHEDULER',
+      };
+      Object.entries(sysHealth).forEach(([k, v]) => {
+        const label = (labels[k] || k).padEnd(22);
+        print(`  ${label}: ${v ? '[ OK ]' : '[ !! DAMAGED ]'}`, v ? 'sys' : 'err');
+      });
+      print('', '');
+      print(`  HW FAILURE PROBABILITY : ${hwChance}% per command`, hwChance >= 20 ? 'err' : hwChance >= 10 ? 'warn' : 'sys');
+      print(`  DAMAGED SUBSYSTEMS     : ${getInstability()} / ${Object.keys(sysHealth).length}`, getInstability() > 0 ? 'warn' : 'sys');
+      printSep();
+      if (getInstability() > 0) {
+        print('  TIP: Use "restore [file]" to recover a system file from backup.', 'dim');
+        print('  TIP: Use "cat [file]" to inspect current system file contents.', 'dim');
+      }
+      break;
+    }
+
+    // ── OS REINSTALL ──────────────────────────────────────────────────────
+    case 'os-reinstall': {
+      if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
+      print('', '');
+      print('╔══════════════════════════════════════════════════════════╗', 'err');
+      print('║  !!  WARNING: FULL OS REINSTALL REQUESTED  !!            ║', 'err');
+      print('║                                                          ║', 'err');
+      print('║  This will:                                              ║', 'err');
+      print('║  • WIPE all user-created and modified files              ║', 'err');
+      print('║  • RESTORE all system files to factory defaults          ║', 'err');
+      print('║  • RESET all subsystem health flags                      ║', 'err');
+      print('║  • CLEAR all saved data from local storage               ║', 'err');
+      print('║                                                          ║', 'err');
+      print('║  THIS CANNOT BE UNDONE.                                  ║', 'err');
+      print('╚══════════════════════════════════════════════════════════╝', 'err');
+      print('', '');
+      await typePrint("TYPE 'CONFIRM REINSTALL' TO PROCEED OR ANYTHING ELSE TO CANCEL:", 'warn');
+
+      const reinstallAnswer = await new Promise(res => { state.waitingInput = { resolve: res }; });
+      if (reinstallAnswer.trim() !== 'CONFIRM REINSTALL') {
+        print('', '');
+        await typePrint('REINSTALL CANCELLED. SYSTEM UNCHANGED.', 'sys');
+        break;
+      }
+
+      print('', '');
+      await typePrint('INITIATING OS REINSTALL SEQUENCE...', 'err');
+      await sleep(400);
+
+      const reinstallSteps = [
+        ['UNMOUNTING USER VOLUMES...', 300],
+        ['WIPING /home/agent...', 500],
+        ['WIPING /var/log...', 300],
+        ['WIPING /etc/user.conf...', 300],
+        ['FORMATTING PARTITION /dev/nvme0n1p3...', 700],
+        ['EXTRACTING BASE SYSTEM IMAGE...', 600],
+        ['INSTALLING KERNEL 6.5.0-tscpp...', 500],
+        ['RESTORING /etc/kernel.cfg...', 200],
+        ['RESTORING /etc/firewall.rules...', 200],
+        ['RESTORING /etc/auth.db...', 200],
+        ['RESTORING /etc/network.conf...', 200],
+        ['RESTORING /etc/enc_keys.dat...', 200],
+        ['RESTORING /etc/boot.cfg...', 200],
+        ['RESTORING /etc/hosts...', 150],
+        ['RESTORING /etc/passwd...', 150],
+        ['RESTORING /etc/cron.dat...', 150],
+        ['RESTORING /var/log/sys.log...', 150],
+        ['REBUILDING INITRAMFS...', 500],
+        ['RUNNING FSCK ON ALL PARTITIONS...', 600],
+        ['VERIFYING CHECKSUMS...', 400],
+      ];
+
+      for (const [msg, delay] of reinstallSteps) {
+        print(`  >> ${msg}`, 'sys');
+        await sleep(delay);
+      }
+
+      // Wipe everything
+      localStorage.removeItem('tscpp_files');
+      localStorage.removeItem('tscpp_health');
+      localStorage.removeItem('tscpp_state');
+      localStorage.removeItem('tscpp_history');
+      localStorage.removeItem('tscpp_macros');
+      localStorage.removeItem('tscpp_theme');
+
+      // Reset to factory
+      Object.keys(files).forEach(k => delete files[k]);
+      Object.assign(files, {
+        "welcome.txt": "TSCPP Terminal v6.0 — Connection required for cloud sync.",
+        "note.txt":    "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
+        "readme.md":   "Welcome agent. Type HELP for command reference.",
+      }, SYSTEM_FILES);
+      saveFiles();
+
+      Object.keys(sysHealth).forEach(k => sysHealth[k] = true);
+      saveSysHealth();
+
+      // Reset runtime state
+      state.hasWifi = false; state.wifiAdmin = false; state.tunnelActive = false;
+      state.admin = false; state.traceRisk = 0; state.currentServer = 'LOCAL';
+      state.thermalThrottle = false;
+      updatePrompt(); updateRisk();
+      alertOverlay.className = '';
+      document.getElementById('fw-pct').textContent = '100%';
+      document.getElementById('fw-fill').style.width = '100%';
+      document.getElementById('enc-pct').textContent = '100%';
+      document.getElementById('enc-fill').style.width = '100%';
+
+      print('', '');
+      await typePrint('[ 100% ] INSTALLATION COMPLETE', 'success');
+      await sleep(300);
+      print('', '');
+      print('╔══════════════════════════════════════════════════════════╗', 'sys');
+      print('║  TSCPP OS REINSTALL SUCCESSFUL                           ║', 'sys');
+      print('║  All systems restored. All user data erased.             ║', 'sys');
+      print('║  Rebooting terminal...                                   ║', 'sys');
+      print('╚══════════════════════════════════════════════════════════╝', 'sys');
+      await sleep(1800);
+      window.location.reload();
+      break;
+    }
+
+    // ── RESTORE ───────────────────────────────────────────────────────────
+    case 'restore': {
+      if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
+      if (!args[1]) { print('USAGE: restore [file]', 'err'); break; }
+      if (!isSystemFile(args[1])) { print('ERR: NOT A SYSTEM FILE.', 'err'); break; }
+      await typePrint(`RESTORING ${args[1]} FROM ENCRYPTED BACKUP...`, 'sys');
+      for (let i = 0; i < 4; i++) {
+        await sleep(180);
+        print(`  >> BLOCK ${i+1}/4 CHECKSUM VERIFIED [0x${randHex(6)}]`, 'sys');
+      }
+      files[args[1]] = SYSTEM_FILES[args[1]];
+      saveFiles();
+      (FILE_CONSEQUENCES[args[1]]?.erase?.effects || []).forEach(e => { sysHealth[e] = true; });
+      saveSysHealth();
+      await typePrint(`${args[1]} RESTORED TO FACTORY STATE — SUBSYSTEM HEALTH RECOVERED.`, 'success');
+      break;
+    }
+
     // ── DEFAULT ───────────────────────────────────────────────────────────
     default:
       print(`ERR: '${cmd}' UNRECOGNIZED. TYPE 'HELP' FOR COMMANDS.`, 'err');
       bumpRisk(1);
+  }
+
+  // ── HARDWARE FAILURE CHECK — fires after most commands ─────────────────
+  const safeFromHW = ['help','clear','history','status','whoami','date','uptime','env','sidebar','minimap','syshealth','restore'];
+  if (!safeFromHW.includes(cmd)) {
+    if (state.thermalThrottle) await sleep(rand(400, 1200));
+    maybeHardwareError();
   }
 }
 
