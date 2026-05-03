@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSCPP Advanced Terminal v9.0</title>
+<title>TSCPP Advanced Terminal v10.0</title>
 <link rel="icon" type="image/png" href="TSCPP.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
@@ -21,7 +21,7 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  /*It is always good to have comments so I remember what is what and for anyone who reads this code can have an idea of what they are looking at.*/
+
   body {
     background: var(--bg);
     color: var(--green);
@@ -1066,7 +1066,7 @@
     <div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div>
   </div>
   <div class="lock-logo">TSCPP</div>
-  <div class="lock-sub">ADVANCED TERMINAL v9.0</div>
+  <div class="lock-sub">ADVANCED TERMINAL v10.0</div>
   <div class="lock-input-wrap" id="lock-wrap">
     <span style="color:#1e3e1e;font-size:11px;">KEY:</span>
     <input type="password" id="lock-input" autofocus autocomplete="off" placeholder="ENTER ACCESS KEY">
@@ -1333,7 +1333,7 @@ const FILE_CONSEQUENCES = {
 };
 
 let files = JSON.parse(localStorage.getItem('tscpp_files') || 'null') || {
-  "welcome.txt":  "TSCPP Terminal v9.0 — Connection required for cloud sync.",
+  "welcome.txt":  "TSCPP Terminal v10.0 — Connection required for cloud sync.",
   "note.txt":     "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
   "readme.md":    "Welcome agent. Type HELP for command reference.",
 };
@@ -1467,7 +1467,10 @@ const CMD_HELP = {
   nano:         { desc:'Open a file in the nano editor',           usage:'nano [file]',                 ex:['nano note.txt','nano /tmp/x.txt'] },
   theme:        { desc:'Change the terminal colour theme',         usage:'theme [name]',                ex:['theme amber','theme blue','theme red','theme ice'] },
   macro:        { desc:'Record and replay command sequences',      usage:'macro [list|record|stop|run|delete] [name]', ex:['macro record myflow','macro stop','macro run myflow','macro list'] },
-  browser:      { desc:'Open the TSCPP web browser',               usage:'browser [url]',               ex:['browser','browser tscpp://store','browser dark://market'] },
+  regedit:      { desc:'Open the visual registry editor (ROOT only)',  usage:'regedit',                     ex:['regedit'] },
+  reg:          { desc:'Query or modify registry values from terminal', usage:'reg [query|set|export|import] [path] [value]', ex:['reg query HKEY_SYSTEM\\Kernel','reg set HKEY_AGENT\\Terminal\\Theme amber','reg export /tmp/backup.txt'] },
+  cron:         { desc:'View or manage scheduled background tasks',     usage:'cron [list|add|clear]',       ex:['cron list','cron add */5 heartbeat','cron clear'] },
+  browser:      { desc:'Open the TSCPP web browser',                    usage:'browser [url]',               ex:['browser','browser tscpp://store','browser dark://market'] },
   specs:        { desc:'Show your hardware specs and active effects', usage:'specs',                     ex:['specs'] },
   apps:         { desc:'List installed software and active effects', usage:'apps',                       ex:['apps'] },
   passwd:       { desc:'Change your lock screen or root key',        usage:'passwd [lock|root]',         ex:['passwd lock','passwd root'] },
@@ -1492,8 +1495,6 @@ function printUsage(cmd) {
 
 let lastActivity = Date.now();
 let timeoutWarned = false;
-const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
-const TIMEOUT_WARN_MS    = 4.5 * 60 * 1000;
 
 document.addEventListener('keydown', () => {
   lastActivity  = Date.now();
@@ -1502,17 +1503,20 @@ document.addEventListener('keydown', () => {
 
 setInterval(() => {
   if (state.locked) return;
-  const idle = Date.now() - lastActivity;
-  if (!timeoutWarned && idle >= TIMEOUT_WARN_MS) {
+  const timeoutMs  = (SESSION_TIMEOUT_MINS || 5) * 60 * 1000;
+  const warnMs     = timeoutMs - 30000;
+  const idle       = Date.now() - lastActivity;
+  const autoLock   = regGet('HKEY_SYSTEM','Security','AutoLock') !== false;
+  if (!autoLock) return;
+  if (!timeoutWarned && idle >= warnMs) {
     timeoutWarned = true;
-    toast('SESSION IDLE — LOCKING IN 30s', 'warn', 5000);
+    toast(`SESSION IDLE — LOCKING IN 30s`, 'warn', 5000);
   }
-  if (idle >= SESSION_TIMEOUT_MS) {
-    sessionLockout();
-  }
+  if (idle >= timeoutMs) sessionLockout();
 }, 10000);
 
 function sessionLockout() {
+  sysLogAppend('SESSION', 'Idle timeout — terminal locked');
   state.admin = false;
   saveState();
   state.locked = true;
@@ -1571,6 +1575,7 @@ const COMMANDS = [
   'date','uptime','kill','ps','chmod','find','grep','diff','zip','unzip',
   'sidebar','minimap','syshealth','restore','os-reinstall','nano','theme','macro',
   'pwd','cd','mkdir','rmdir','man','passwd','browser','specs','apps',
+  'regedit','reg','cron',
 ];
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -1857,6 +1862,14 @@ function parseSysFile(name) {
 }
 function getSysSetting(file, key, fallback=null) {
   return parseSysFile(file)[key] ?? fallback;
+}
+
+function sysLogAppend(tag, msg) {
+  if (!regGet('HKEY_SYSTEM','Security','AuditLogging')) return;
+  const ts   = new Date().toISOString().substring(11,19);
+  const line = `[${ts}] [${tag}] ${msg}`;
+  files['sys.log'] = (files['sys.log'] || '') + '\n' + line;
+  saveFiles();
 }
 
 const REGISTRY_DEFAULTS = {
@@ -3003,9 +3016,10 @@ async function bootSequence() {
   if (!sysHealth.firewall) { document.getElementById('fw-pct').textContent='0%'; document.getElementById('fw-fill').style.width='0%'; }
   if (!sysHealth.encryption) { document.getElementById('enc-pct').textContent='0%'; document.getElementById('enc-fill').style.width='0%'; }
   updateRisk();
+  applyRegistryEffects();
 
   const lines = [
-    ['>> TSCPP BIOS v9.0 — INITIALIZING...','sys'],
+    ['>> TSCPP BIOS v10.0 — INITIALIZING...','sys'],
     ['>> CPU CHECK........ [ 8-CORE / 4.2GHz ]  [ OK ]','sys'],
     ['>> RAM CHECK........ [ 32GB DDR5 ECC ]     [ OK ]','sys'],
     ['>> DISK CHECK....... [ 2TB NVME RAID-1 ]   [ OK ]','sys'],
@@ -3099,13 +3113,25 @@ async function processCommand(raw) {
 
   if (state.waitingPw) {
     state.waitingPw = false;
+    cmdInput.type = 'text';
     if (raw === _activeKeys.root) {
+      failedLoginAttempts = 0;
       state.admin = true;
       updatePrompt();
+      sysLogAppend('AUTH', 'ROOT login successful');
       await typePrint('ROOT ACCESS GRANTED. ALL TOOLS UNLOCKED.', 'admin');
     } else {
+      failedLoginAttempts++;
+      sysLogAppend('AUTH', `ROOT login FAILED (attempt ${failedLoginAttempts})`);
       await typePrint('AUTH_ERROR: INCORRECT KEY.', 'err');
       bumpRisk(10);
+      const maxAttempts = regGet('HKEY_SYSTEM','Security','LoginAttempts') || 3;
+      if (failedLoginAttempts >= maxAttempts) {
+        await typePrint(`!! MAX ATTEMPTS REACHED (${maxAttempts}) — LOCKING SESSION !!`, 'err');
+        sysLogAppend('SECURITY', `Login lockout triggered after ${failedLoginAttempts} failed attempts`);
+        failedLoginAttempts = 0;
+        setTimeout(() => sessionLockout(), 1500);
+      }
     }
     return;
   }
@@ -3134,7 +3160,7 @@ async function processCommand(raw) {
     case 'help': {
       if (args[1]) { printUsage(args[1]); break; }
       printSep();
-      await typePrint('TSCPP TERMINAL v9.0 — COMMAND REFERENCE', 'sys', 6);
+      await typePrint('TSCPP TERMINAL v10.0 — COMMAND REFERENCE', 'sys', 6);
       print('  TIP: Type "help [command]" or "man [command]" for detailed usage.', 'dim');
       printSep();
       const groups = [
@@ -3171,11 +3197,15 @@ async function processCommand(raw) {
       await typePrint('!! PANIC TRIGGERED — ALL CONNECTIONS SEVERED — LOGS PURGED !!', 'err');
       break;
 
-    case 'reboot':
-      await typePrint('REBOOTING...', 'sys');
-      await sleep(800);
+    case 'reboot': {
+      const bConf   = parseSysFile('boot.cfg');
+      const timeout = parseInt(bConf['TIMEOUT'] || regGet('HKEY_SYSTEM','Boot','RebootTimeout') || 3);
+      const silent  = regGet('HKEY_SYSTEM','Boot','SilentBoot');
+      if (!silent) await typePrint(`REBOOTING IN ${timeout} SECOND(S)...`, 'sys');
+      for (let i = timeout; i > 0; i--) { await sleep(1000); if (!silent) print(`  ${i}...`, 'dim'); }
       window.location.reload();
       break;
+    }
 
     case 'echo':
       print(args.slice(1).join(' '));
@@ -3373,47 +3403,67 @@ async function processCommand(raw) {
       break;
 
     case 'ping': {
-      const host = args[1] || '8.8.8.8';
-      await typePrint(`PING ${host}`, 'sys');
+      const pingHost = args[1] || '8.8.8.8';
+      const nc   = parseSysFile('network.conf');
+      const gw   = nc['GATEWAY'] || '10.0.0.1';
+      const mtu  = nc['MTU'] || '1500';
+      const hosts = parseSysFile('hosts');
+      const resolved = hosts[pingHost] || pingHost;
+      await typePrint(`PING ${pingHost}${resolved !== pingHost ? ' → '+resolved : ''} via gw=${gw} mtu=${mtu}`, 'sys');
+      if (!sysHealth.hosts && pingHost !== resolved) print('  WARN: hosts file damaged — resolution may be wrong', 'warn');
       for (let i=0;i<4;i++) {
         await sleep(200);
         const ms = rand(8, state.hasWifi ? 80 : 999);
         const ok = state.hasWifi && ms < 200;
-        print(`  icmp_seq=${i+1} time=${ms}ms ${ok?'TTL=64':'REQUEST TIMEOUT'}`, ok?'sys':'err');
+        print(`  icmp_seq=${i+1} ttl=64 time=${ms}ms${ok?'':' REQUEST TIMEOUT'}`, ok?'sys':'err');
       }
+      if (!state.hasWifi) print('  ERR: No route to host — check network.conf', 'err');
       break;
     }
 
     case 'trace': {
-      const host = args[1] || '10.0.0.1';
-      await typePrint(`TRACEROUTE TO ${host}`, 'sys');
-      const hops = rand(4,10);
-      for (let i=1;i<=hops;i++) {
-        await sleep(150);
-        print(`  ${String(i).padStart(2)}  ${randIP()}   ${rand(2,80)}ms`, 'sys');
-      }
-      print(`  DESTINATION REACHED: ${host}`, 'success');
+      const trHost = args[1] || '10.0.0.1';
+      const tnc   = parseSysFile('network.conf');
+      const tgw   = tnc['GATEWAY'] || '10.0.0.1';
+      const thosts = parseSysFile('hosts');
+      const tres  = thosts[trHost] || trHost;
+      await typePrint(`TRACEROUTE TO ${trHost}${tres !== trHost ? ' ('+tres+')' : ''}`, 'sys');
+      print(`   1  ${tgw}  ${rand(1,4)}ms  [gateway]`, 'sys');
+      const thops = rand(3,8);
+      for (let i=2;i<=thops;i++) { await sleep(140); print(`  ${String(i).padStart(2)}  ${randIP()}  ${rand(5,80)}ms`, 'sys'); }
+      print(`  ${thops+1}  ${tres}  ${rand(10,120)}ms  DESTINATION REACHED`, 'success');
       break;
     }
 
-    case 'netstat':
-      await typePrint('ACTIVE CONNECTIONS:', 'sys');
-      printTable(
-        ['PROTO','LOCAL ADDR','REMOTE ADDR','STATE'],
-        [
-          ['TCP', '0.0.0.0:22',    '---',            'LISTEN'],
-          ['TCP', '127.0.0.1:443', randIP()+':'+rand(1024,65535), state.hasWifi?'ESTABLISHED':'CLOSED'],
-          ['UDP', '0.0.0.0:53',    '---',            'LISTEN'],
-          ['TCP', '0.0.0.0:8080',  randIP()+':'+rand(1024,65535), state.hasWifi?'ESTABLISHED':'CLOSED'],
-        ]
-      );
+    case 'netstat': {
+      const nsiface = parseSysFile('network.conf')['IFACE'] || 'eth0';
+      const nsfwrules = parseSysFile('firewall.rules');
+      const nsallowed = Object.entries(nsfwrules).filter(([k])=>k.startsWith('ALLOW')).map(([,v])=>v);
+      await typePrint(`ACTIVE CONNECTIONS [${nsiface}]:`, 'sys');
+      printTable(['PROTO','LOCAL ADDR','REMOTE ADDR','STATE'], [
+        ['TCP','0.0.0.0:22','---','LISTEN'],
+        ['TCP','127.0.0.1:443',randIP()+':'+rand(1024,65535),state.hasWifi?'ESTABLISHED':'CLOSED'],
+        ['UDP','0.0.0.0:53','---','LISTEN'],
+        ['TCP','0.0.0.0:8080',randIP()+':'+rand(1024,65535),state.hasWifi?'ESTABLISHED':'CLOSED'],
+      ]);
+      if (nsallowed.length) print(`  FW ALLOW rules from firewall.rules: ${nsallowed.join(', ')}`, 'dim');
       break;
+    }
 
     case 'portmap': {
-      const target = args[1] || state.currentServer;
-      await typePrint(`PORT SCAN: ${target}`, 'sys');
-      const ports = [[22,'ssh','OPEN'],[23,'telnet','FILTERED'],[80,'http','OPEN'],[443,'https','OPEN'],[3306,'mysql','CLOSED'],[8080,'http-alt','OPEN'],[31337,'elite','OPEN']];
-      printTable(['PORT','SERVICE','STATE'], ports.map(p=>[p[0].toString(),p[1],p[2]]));
+      const pmtgt = args[1] || state.currentServer;
+      const pmfw  = parseSysFile('firewall.rules');
+      const pmpol = pmfw['POLICY'] || 'DROP';
+      const pmports = Object.entries(pmfw).filter(([k])=>k.startsWith('ALLOW')).map(([,v])=>parseInt(v));
+      await typePrint(`PORT SCAN: ${pmtgt} [policy=${pmpol}]`, 'sys');
+      const allPorts = [[22,'ssh'],[23,'telnet'],[80,'http'],[443,'https'],[3306,'mysql'],[8080,'http-alt'],[53,'dns'],[31337,'elite']];
+      printTable(['PORT','SERVICE','STATE','FW'],
+        allPorts.map(([p,s]) => {
+          const open = pmports.includes(p);
+          return [p.toString(), s, open?'OPEN':pmpol==='DROP'?'FILTERED':'CLOSED', open?'ALLOW':pmpol];
+        })
+      );
+      print(`  Source: /etc/firewall.rules`, 'dim');
       break;
     }
 
@@ -3989,6 +4039,132 @@ async function processCommand(raw) {
       break;
     }
 
+    case 'regedit':
+      if (!state.admin) { print('ERR: ROOT required to open registry editor.', 'err'); break; }
+      await typePrint('LAUNCHING REGISTRY EDITOR...', 'sys');
+      await sleep(200);
+      regeditOpen();
+      break;
+
+    case 'reg': {
+      if (!state.admin) { print('ERR: ROOT required for registry operations.', 'err'); break; }
+      const sub = (args[1]||'').toLowerCase();
+      if (!sub) {
+        print('USAGE: reg [query|set|delete|export|import]', 'err');
+        print('  reg query  HKEY_SYSTEM\\Kernel\\ThermalPolicy', 'dim');
+        print('  reg set    HKEY_AGENT\\Terminal\\Theme amber', 'dim');
+        print('  reg delete HKEY_AGENT\\Terminal\\FontSize', 'dim');
+        print('  reg export /tmp/registry_backup.txt', 'dim');
+        break;
+      }
+      if (sub === 'query') {
+        if (!args[2]) { print('USAGE: reg query [HIVE\\Key\\Name]', 'err'); break; }
+        const parts = args[2].split('\\');
+        if (parts.length === 2) {
+          const [h,k] = parts;
+          const vals = registry?.[h]?.[k];
+          if (!vals) { print(`ERR: Key not found: ${h}\\${k}`, 'err'); break; }
+          printSep();
+          print(`  ${h}\\${k}`, 'admin');
+          Object.entries(vals).forEach(([n,e]) => {
+            const def = REGISTRY_DEFAULTS?.[h]?.[k]?.[n];
+            const mod = def && JSON.stringify(e.value) !== JSON.stringify(def.value);
+            print(`    ${n.padEnd(20)} ${e.type.padEnd(12)} ${String(e.value)}${mod?' [MODIFIED]':''}`, mod?'warn':'sys');
+          });
+          printSep();
+        } else if (parts.length === 3) {
+          const [h,k,n] = parts;
+          const entry = registry?.[h]?.[k]?.[n];
+          if (!entry) { print(`ERR: Value not found: ${args[2]}`, 'err'); break; }
+          print(`${args[2]}  ${entry.type}  ${entry.value}`, 'sys');
+          const desc = REGISTRY_DEFAULTS?.[h]?.[k]?.[n]?.desc;
+          if (desc) print(`  (${desc})`, 'dim');
+        } else { print('ERR: Path must be HIVE\\Key or HIVE\\Key\\Name', 'err'); }
+        break;
+      }
+      if (sub === 'set') {
+        if (args.length < 4) { print('USAGE: reg set [HIVE\\Key\\Name] [value]', 'err'); break; }
+        const parts = args[2].split('\\');
+        if (parts.length !== 3) { print('ERR: Path must be HIVE\\Key\\Name', 'err'); break; }
+        const [h,k,n] = parts;
+        const entry = registry?.[h]?.[k]?.[n];
+        if (!entry) { print(`ERR: Value not found: ${args[2]}`, 'err'); break; }
+        let newVal = args.slice(3).join(' ');
+        if (entry.type === 'REG_BOOL') {
+          newVal = newVal.toLowerCase() === 'true' || newVal === '1';
+        } else if (entry.type === 'REG_DWORD') {
+          newVal = parseInt(newVal);
+          if (isNaN(newVal)) { print('ERR: REG_DWORD requires an integer value.', 'err'); break; }
+        }
+        regSet(h, k, n, newVal);
+        await typePrint(`SET ${args[2]} = ${newVal}`, 'success');
+        break;
+      }
+      if (sub === 'export') {
+        if (!args[2]) { print('USAGE: reg export [file]', 'err'); break; }
+        const { name: regFName, dir: regFDir } = resolveFile(args[2]);
+        if (!canWrite(regFDir)) { print(`ERR: Permission denied — ${regFDir}`, 'err'); break; }
+        const dump = JSON.stringify(registry, null, 2);
+        files[regFName] = dump;
+        fileLocations[regFName] = regFDir;
+        saveFiles(); saveLocs();
+        await typePrint(`REGISTRY EXPORTED TO ${regFDir}/${regFName} (${dump.length} bytes)`, 'success');
+        break;
+      }
+      if (sub === 'import') {
+        if (!args[2]) { print('USAGE: reg import [file]', 'err'); break; }
+        const { name: riFName } = resolveFile(args[2]);
+        if (!files[riFName]) { print('ERR: File not found.', 'err'); break; }
+        try {
+          const imported = JSON.parse(files[riFName]);
+          Object.assign(registry, imported);
+          saveRegistry();
+          applyRegistryEffects();
+          await typePrint(`REGISTRY IMPORTED FROM ${riFName} — EFFECTS APPLIED.`, 'success');
+        } catch(e) { print('ERR: Invalid registry file — could not parse JSON.', 'err'); }
+        break;
+      }
+      print(`ERR: Unknown subcommand '${sub}'. Options: query, set, export, import`, 'err');
+      break;
+    }
+
+    case 'cron': {
+      const cronSub = (args[1]||'list').toLowerCase();
+      const cronData = parseSysFile('cron.dat');
+      if (cronSub === 'list' || !args[1]) {
+        if (!sysHealth.cron) { print('ERR: cron.dat damaged — scheduler offline.', 'err'); break; }
+        printSep();
+        print('  CRON SCHEDULE (from /etc/cron.dat)', 'sys');
+        printSep();
+        Object.entries(cronData).forEach(([schedule, cmd]) => {
+          print(`  ${schedule.padEnd(20)}  ${cmd}`, '');
+        });
+        if (!Object.keys(cronData).length) print('  (no tasks scheduled)', 'dim');
+        printSep();
+        break;
+      }
+      if (cronSub === 'add') {
+        if (!state.admin) { print('ERR: ROOT required.', 'err'); break; }
+        if (args.length < 4) { print('USAGE: cron add [schedule] [command]', 'err'); break; }
+        const schedule = args[2];
+        const cronCmd  = args.slice(3).join(' ');
+        const existing = files['cron.dat'] || SYSTEM_FILES['cron.dat'];
+        files['cron.dat'] = existing + `\n${schedule} ${cronCmd}`;
+        saveFiles();
+        await typePrint(`CRON JOB ADDED: ${schedule} → ${cronCmd}`, 'success');
+        break;
+      }
+      if (cronSub === 'clear') {
+        if (!state.admin) { print('ERR: ROOT required.', 'err'); break; }
+        files['cron.dat'] = '';
+        saveFiles();
+        await typePrint('ALL CRON JOBS CLEARED.', 'admin');
+        break;
+      }
+      print('USAGE: cron [list|add|clear]', 'err');
+      break;
+    }
+
     case 'browser': {
       if (!state.hasWifi) { print('ERR: No uplink — browser requires a network connection.', 'err'); print('Run scan → hack [id] to get online first.', 'dim'); break; }
       await typePrint('LAUNCHING TSCPP BROWSER...', 'sys');
@@ -4163,10 +4339,11 @@ async function processCommand(raw) {
       localStorage.removeItem('tscpp_root_key');
       localStorage.removeItem('tscpp_software');
       localStorage.removeItem('tscpp_hardware');
+      localStorage.removeItem('tscpp_registry');
 
       Object.keys(files).forEach(k => delete files[k]);
       Object.assign(files, {
-        "welcome.txt": "TSCPP Terminal v9.0 — Connection required for cloud sync.",
+        "welcome.txt": "TSCPP Terminal v10.0 — Connection required for cloud sync.",
         "note.txt":    "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
         "readme.md":   "Welcome agent. Type HELP for command reference.",
       }, SYSTEM_FILES);
