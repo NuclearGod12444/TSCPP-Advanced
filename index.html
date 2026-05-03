@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSCPP Advanced Terminal v8.0</title>
+<title>TSCPP Advanced Terminal v9.0</title>
 <link rel="icon" type="image/png" href="TSCPP.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
@@ -788,7 +788,125 @@
   }
   .sw-install-btn:hover { background: var(--green-dark); color: var(--green); }
   .sw-install-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  
+
+  #regedit-overlay {
+    position: fixed; inset: 0; z-index: 310;
+    display: flex; flex-direction: column;
+    background: #080808;
+    font-family: 'Share Tech Mono', monospace; font-size: 12px;
+  }
+  #regedit-overlay.hidden { display: none; }
+  #regedit-titlebar {
+    background: var(--green-dim); color: var(--bg);
+    padding: 4px 12px; font-family: 'Orbitron', monospace;
+    font-size: 11px; letter-spacing: 2px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+  #regedit-menubar {
+    background: #111; border-bottom: 1px solid #1a1a1a;
+    display: flex; gap: 0; padding: 0 4px; flex-shrink: 0;
+  }
+  .rg-menu-item {
+    padding: 4px 12px; color: #555; cursor: pointer; font-size: 11px;
+  }
+  .rg-menu-item:hover { background: #1a1a1a; color: var(--green-dim); }
+  #regedit-pathbar {
+    background: #0d0d0d; border-bottom: 1px solid #1a1a1a;
+    padding: 4px 10px; font-size: 11px; color: #444;
+    flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+  }
+  #regedit-pathbar span { color: var(--green-dim); }
+  #regedit-body {
+    display: flex; flex: 1; overflow: hidden;
+  }
+  #regedit-tree {
+    width: 260px; flex-shrink: 0;
+    background: #0a0a0a; border-right: 1px solid #1a1a1a;
+    overflow-y: auto; padding: 4px 0;
+  }
+  #regedit-tree::-webkit-scrollbar { width: 4px; }
+  #regedit-tree::-webkit-scrollbar-thumb { background: #222; }
+  .rg-hive {
+    padding: 4px 8px 4px 10px; color: var(--amber);
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 1px;
+    user-select: none;
+  }
+  .rg-hive:hover { background: #1a1a00; }
+  .rg-hive.selected { background: #2a2000; }
+  .rg-key {
+    padding: 3px 8px 3px 24px; color: #888;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    font-size: 11px; user-select: none;
+  }
+  .rg-key:hover { background: #111; color: var(--green-dim); }
+  .rg-key.selected { background: #0a1a0a; color: var(--green); }
+  .rg-chevron { font-size: 9px; transition: transform 0.15s; }
+  .rg-chevron.open { transform: rotate(90deg); }
+  .rg-subkeys { display: none; }
+  .rg-subkeys.open { display: block; }
+  #regedit-values {
+    flex: 1; overflow-y: auto; background: #080808;
+  }
+  #regedit-values::-webkit-scrollbar { width: 4px; }
+  #regedit-values::-webkit-scrollbar-thumb { background: #222; }
+  .rg-values-header {
+    display: grid; grid-template-columns: 2fr 1fr 3fr;
+    background: #111; border-bottom: 1px solid #1a1a1a;
+    padding: 5px 12px; font-size: 10px; color: #444;
+    letter-spacing: 1px; position: sticky; top: 0;
+  }
+  .rg-value-row {
+    display: grid; grid-template-columns: 2fr 1fr 3fr;
+    padding: 5px 12px; border-bottom: 1px solid #0f0f0f;
+    cursor: pointer; transition: background 0.1s;
+  }
+  .rg-value-row:hover { background: #0f0f0f; }
+  .rg-value-row.selected { background: #0a1a0a; }
+  .rg-val-name { color: var(--green-dim); }
+  .rg-val-type { color: #444; font-size: 10px; }
+  .rg-val-data { color: #aaa; }
+  .rg-val-data.bool-true  { color: var(--green); }
+  .rg-val-data.bool-false { color: #555; }
+  .rg-val-data.modified   { color: var(--amber); }
+  #regedit-statusbar {
+    background: #111; border-top: 1px solid #1a1a1a;
+    padding: 3px 10px; font-size: 10px; color: #333;
+    flex-shrink: 0; display: flex; justify-content: space-between;
+  }
+  #rg-edit-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 320;
+  }
+  #rg-edit-modal.hidden { display: none; }
+  #rg-edit-box {
+    background: #111; border: 1px solid var(--green-dark);
+    padding: 20px 24px; width: 380px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .rg-edit-title { font-family: 'Orbitron', monospace; font-size: 11px; color: var(--green-dim); letter-spacing: 2px; }
+  .rg-edit-path  { font-size: 10px; color: #333; }
+  .rg-edit-field { display: flex; flex-direction: column; gap: 5px; }
+  .rg-edit-field label { font-size: 10px; color: #555; letter-spacing: 1px; }
+  .rg-edit-field input, .rg-edit-field select {
+    background: #080808; border: 1px solid #222; color: var(--green);
+    font-family: inherit; font-size: 12px; padding: 6px 8px; outline: none;
+    caret-color: var(--green);
+  }
+  .rg-edit-field input:focus, .rg-edit-field select:focus { border-color: var(--green-dark); }
+  .rg-edit-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+  .rg-btn {
+    background: var(--green-dark); border: 1px solid var(--border);
+    color: var(--green); font-family: 'Orbitron', monospace;
+    font-size: 9px; padding: 6px 14px; cursor: pointer; letter-spacing: 1px;
+  }
+  .rg-btn:hover { background: var(--green-dim); color: var(--bg); }
+  .rg-btn.cancel { background: #1a1a1a; border-color: #333; color: #555; }
+  .rg-btn.cancel:hover { color: var(--red); border-color: var(--red); }
+</style>
   @keyframes glitch-h {
     0%   { transform: translate(0); }
     20%  { transform: translate(-4px, 1px) skewX(2deg); filter: hue-rotate(90deg); }
@@ -948,7 +1066,7 @@
     <div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div>
   </div>
   <div class="lock-logo">TSCPP</div>
-  <div class="lock-sub">ADVANCED TERMINAL v8.0</div>
+  <div class="lock-sub">ADVANCED TERMINAL v9.0</div>
   <div class="lock-input-wrap" id="lock-wrap">
     <span style="color:#1e3e1e;font-size:11px;">KEY:</span>
     <input type="password" id="lock-input" autofocus autocomplete="off" placeholder="ENTER ACCESS KEY">
@@ -973,6 +1091,57 @@
     <div id="browser-status">Ready</div>
   </div>
   <div id="browser-content"></div>
+</div>
+
+<div id="regedit-overlay" class="hidden">
+  <div id="regedit-titlebar">
+    <span>TSCPP REGISTRY EDITOR</span>
+    <span style="cursor:pointer;opacity:0.7;" onclick="regeditClose()">✕ CLOSE</span>
+  </div>
+  <div id="regedit-menubar">
+    <div class="rg-menu-item" onclick="rgMenuFile()">File</div>
+    <div class="rg-menu-item" onclick="rgMenuEdit()">Edit</div>
+    <div class="rg-menu-item" onclick="rgMenuFind()">Find</div>
+    <div class="rg-menu-item" onclick="rgMenuHelp()">Help</div>
+  </div>
+  <div id="regedit-pathbar">PATH: <span id="rg-path">HKEY_SYSTEM</span></div>
+  <div id="regedit-body">
+    <div id="regedit-tree"></div>
+    <div id="regedit-values">
+      <div class="rg-values-header">
+        <span>NAME</span><span>TYPE</span><span>DATA</span>
+      </div>
+      <div id="rg-values-list"></div>
+    </div>
+  </div>
+  <div id="regedit-statusbar">
+    <span id="rg-status">Select a key to view values</span>
+    <span id="rg-count"></span>
+  </div>
+</div>
+
+<div id="rg-edit-modal" class="hidden">
+  <div id="rg-edit-box">
+    <div class="rg-edit-title" id="rg-edit-title">EDIT VALUE</div>
+    <div class="rg-edit-path" id="rg-edit-path"></div>
+    <div class="rg-edit-field">
+      <label>VALUE NAME</label>
+      <input type="text" id="rg-edit-name" readonly>
+    </div>
+    <div class="rg-edit-field">
+      <label>TYPE</label>
+      <input type="text" id="rg-edit-type" readonly>
+    </div>
+    <div class="rg-edit-field">
+      <label id="rg-edit-data-label">VALUE DATA</label>
+      <input type="text" id="rg-edit-data" autocomplete="off">
+    </div>
+    <div class="setup-warn" id="rg-edit-warn"></div>
+    <div class="rg-edit-buttons">
+      <button class="rg-btn cancel" onclick="rgEditCancel()">CANCEL</button>
+      <button class="rg-btn" onclick="rgEditSave()">SAVE</button>
+    </div>
+  </div>
 </div>
 
 <!-- Main Shell -->
@@ -1164,7 +1333,7 @@ const FILE_CONSEQUENCES = {
 };
 
 let files = JSON.parse(localStorage.getItem('tscpp_files') || 'null') || {
-  "welcome.txt":  "TSCPP Terminal v8.0 — Connection required for cloud sync.",
+  "welcome.txt":  "TSCPP Terminal v9.0 — Connection required for cloud sync.",
   "note.txt":     "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
   "readme.md":    "Welcome agent. Type HELP for command reference.",
 };
@@ -1298,7 +1467,10 @@ const CMD_HELP = {
   nano:         { desc:'Open a file in the nano editor',           usage:'nano [file]',                 ex:['nano note.txt','nano /tmp/x.txt'] },
   theme:        { desc:'Change the terminal colour theme',         usage:'theme [name]',                ex:['theme amber','theme blue','theme red','theme ice'] },
   macro:        { desc:'Record and replay command sequences',      usage:'macro [list|record|stop|run|delete] [name]', ex:['macro record myflow','macro stop','macro run myflow','macro list'] },
-  passwd:       { desc:'Change your lock screen or root key',      usage:'passwd [lock|root]',           ex:['passwd lock','passwd root'] },
+  browser:      { desc:'Open the TSCPP web browser',               usage:'browser [url]',               ex:['browser','browser tscpp://store','browser dark://market'] },
+  specs:        { desc:'Show your hardware specs and active effects', usage:'specs',                     ex:['specs'] },
+  apps:         { desc:'List installed software and active effects', usage:'apps',                       ex:['apps'] },
+  passwd:       { desc:'Change your lock screen or root key',        usage:'passwd [lock|root]',         ex:['passwd lock','passwd root'] },
   man:          { desc:'Show the manual page for a command',       usage:'man [command]',               ex:['man hack','man ls','man tunnel'] },
 };
 
@@ -1368,7 +1540,9 @@ function getInstability() {
 }
 
 function hwFailureChance() {
-  return Math.min(0.40, 0.02 + getInstability() * 0.06);
+  const efx = getHWEffects();
+  const thermalBonus = hasSoftware('heat-daemon') ? efx.thermalChance * 0.5 : efx.thermalChance;
+  return Math.min(0.40, 0.02 + getInstability() * 0.06 + thermalBonus * 0.3);
 }
 
 const scannedNetworks = [
@@ -1396,7 +1570,7 @@ const COMMANDS = [
   'firewall','vpn','proxy','encode','decode','env','alias','history','echo',
   'date','uptime','kill','ps','chmod','find','grep','diff','zip','unzip',
   'sidebar','minimap','syshealth','restore','os-reinstall','nano','theme','macro',
-  'pwd','cd','mkdir','rmdir','man','passwd',
+  'pwd','cd','mkdir','rmdir','man','passwd','browser','specs','apps',
 ];
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -1671,6 +1845,275 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('lock-input').focus();
   }
 });
+
+function parseSysFile(name) {
+  const content = files[name] || SYSTEM_FILES[name] || '';
+  const map = {};
+  content.split('\n').forEach(line => {
+    const eq = line.indexOf('=');
+    if (eq > 0) map[line.substring(0,eq).trim()] = line.substring(eq+1).trim();
+  });
+  return map;
+}
+function getSysSetting(file, key, fallback=null) {
+  return parseSysFile(file)[key] ?? fallback;
+}
+
+const REGISTRY_DEFAULTS = {
+  HKEY_SYSTEM: {
+    Kernel: {
+      ThermalPolicy:  { type:'REG_DWORD', value:0,         desc:'0=Balanced 1=Performance 2=PowerSaver' },
+      MaxConnections: { type:'REG_DWORD', value:16,        desc:'Max simultaneous network connections' },
+      PreemptMode:    { type:'REG_SZ',    value:'FULL',    desc:'FULL, VOLUNTARY, or NONE' },
+      HZ:             { type:'REG_DWORD', value:1000,      desc:'Kernel timer frequency in Hz' },
+    },
+    Security: {
+      LoginAttempts:  { type:'REG_DWORD', value:3,         desc:'Max failed root attempts before lockout' },
+      AutoLock:       { type:'REG_BOOL',  value:true,      desc:'Lock terminal on session timeout' },
+      AuditLogging:   { type:'REG_BOOL',  value:true,      desc:'Write auth events to sys.log' },
+    },
+    Boot: {
+      RebootTimeout:  { type:'REG_DWORD', value:3,         desc:'Countdown seconds before reboot' },
+      SecureBoot:     { type:'REG_BOOL',  value:true,      desc:'Enforce signed module loading' },
+      SilentBoot:     { type:'REG_BOOL',  value:false,     desc:'Suppress boot messages on startup' },
+    },
+  },
+  HKEY_NETWORK: {
+    Firewall: {
+      StealthMode:    { type:'REG_BOOL',  value:false,     desc:'Hide open ports — passive trace reduced' },
+      DefaultPolicy:  { type:'REG_SZ',    value:'DROP',    desc:'DROP or ACCEPT unmatched packets' },
+      LogDropped:     { type:'REG_BOOL',  value:true,      desc:'Append dropped packets to sys.log' },
+    },
+    Proxy: {
+      AutoRoute:      { type:'REG_BOOL',  value:false,     desc:'Auto-route all traffic via proxy' },
+      ChainLength:    { type:'REG_DWORD', value:1,         desc:'Number of proxy hops (1-5)' },
+    },
+    VPN: {
+      AutoConnect:    { type:'REG_BOOL',  value:false,     desc:'Auto-connect VPN when uplink comes up' },
+      Protocol:       { type:'REG_SZ',    value:'WIREGUARD', desc:'WIREGUARD, OPENVPN, or IPSEC' },
+      KillSwitch:     { type:'REG_BOOL',  value:false,     desc:'Drop all traffic if VPN disconnects' },
+    },
+  },
+  HKEY_AGENT: {
+    Terminal: {
+      Theme:          { type:'REG_SZ',    value:'green',   desc:'green amber red blue ice phosphor' },
+      SessionTimeout: { type:'REG_DWORD', value:5,         desc:'Idle timeout in minutes (1-60)' },
+      BootAnimation:  { type:'REG_BOOL',  value:true,      desc:'Show animated boot sequence' },
+      FontSize:       { type:'REG_DWORD', value:14,        desc:'Terminal font size px (10-20)' },
+    },
+    Profile: {
+      Username:       { type:'REG_SZ',    value:'AGENT',   desc:'Display name shown in prompt' },
+      Callsign:       { type:'REG_SZ',    value:'GHOST',   desc:'Operative callsign' },
+    },
+  },
+  HKEY_SOFTWARE: {
+    CrackSuite: {
+      GPUAcceleration:{ type:'REG_BOOL',  value:true,      desc:'Enable GPU hash acceleration' },
+      MaxWordlists:   { type:'REG_DWORD', value:4,         desc:'Concurrent wordlist threads' },
+    },
+    Browser: {
+      HomePage:       { type:'REG_SZ',    value:'tscpp://home', desc:'Default home page URL' },
+      DarkWebEnabled: { type:'REG_BOOL',  value:false,     desc:'Allow dark:// navigation' },
+    },
+    StealthVPN: {
+      RotateInterval: { type:'REG_DWORD', value:300,       desc:'IP rotation interval in seconds' },
+    },
+  },
+};
+
+let registry = JSON.parse(localStorage.getItem('tscpp_registry') || 'null') || deepCloneRegistry();
+function deepCloneRegistry() {
+  return JSON.parse(JSON.stringify(REGISTRY_DEFAULTS));
+}
+function saveRegistry() { localStorage.setItem('tscpp_registry', JSON.stringify(registry)); }
+
+function regGet(hive, key, name) {
+  return registry?.[hive]?.[key]?.[name]?.value ?? REGISTRY_DEFAULTS?.[hive]?.[key]?.[name]?.value ?? null;
+}
+function regSet(hive, key, name, value) {
+  if (!registry[hive]) registry[hive] = {};
+  if (!registry[hive][key]) registry[hive][key] = {};
+  if (!registry[hive][key][name]) {
+    const def = REGISTRY_DEFAULTS?.[hive]?.[key]?.[name];
+    if (def) registry[hive][key][name] = { ...def };
+    else return false;
+  }
+  registry[hive][key][name].value = value;
+  saveRegistry();
+  applyRegistryEffects();
+  return true;
+}
+
+function applyRegistryEffects() {
+  const theme   = regGet('HKEY_AGENT','Terminal','Theme');
+  const timeout = regGet('HKEY_AGENT','Terminal','SessionTimeout');
+  const font    = regGet('HKEY_AGENT','Terminal','FontSize');
+  const uname   = regGet('HKEY_AGENT','Profile','Username');
+
+  if (theme   && THEMES[theme]) applyTheme(theme);
+  if (timeout && timeout >= 1 && timeout <= 60) {
+    SESSION_TIMEOUT_MINS = timeout;
+  }
+  if (font >= 10 && font <= 20) {
+    document.getElementById('cmd-input').style.fontSize = font+'px';
+    document.getElementById('output').style.fontSize    = font+'px';
+  }
+  if (uname) state._username = uname;
+}
+
+let SESSION_TIMEOUT_MINS = regGet('HKEY_AGENT','Terminal','SessionTimeout') || 5;
+
+let rgCurrentHive = null;
+let rgCurrentKey  = null;
+let rgEditTarget  = null;
+let failedLoginAttempts = 0;
+
+function regeditOpen() {
+  document.getElementById('regedit-overlay').classList.remove('hidden');
+  document.getElementById('shell').style.display = 'none';
+  rgBuildTree();
+  rgSelectHive('HKEY_SYSTEM');
+}
+function regeditClose() {
+  document.getElementById('regedit-overlay').classList.add('hidden');
+  document.getElementById('shell').style.display = 'flex';
+  cmdInput.focus();
+}
+
+function rgBuildTree() {
+  const tree = document.getElementById('regedit-tree');
+  tree.innerHTML = '';
+  Object.keys(registry).forEach(hive => {
+    const hiveEl = document.createElement('div');
+    hiveEl.className = 'rg-hive'; hiveEl.id = 'rg-hive-'+hive;
+    hiveEl.innerHTML = `<span class="rg-chevron" id="rg-chev-${hive}">▶</span> ${hive}`;
+    hiveEl.onclick = () => rgToggleHive(hive);
+    tree.appendChild(hiveEl);
+    const subEl = document.createElement('div');
+    subEl.className = 'rg-subkeys'; subEl.id = 'rg-sub-'+hive;
+    Object.keys(registry[hive]).forEach(key => {
+      const keyEl = document.createElement('div');
+      keyEl.className = 'rg-key'; keyEl.id = `rg-key-${hive}-${key}`;
+      keyEl.innerHTML = `📁 ${key}`;
+      keyEl.onclick = () => rgSelectKey(hive, key);
+      subEl.appendChild(keyEl);
+    });
+    tree.appendChild(subEl);
+  });
+}
+
+function rgToggleHive(hive) {
+  const chev = document.getElementById('rg-chev-'+hive);
+  const sub  = document.getElementById('rg-sub-'+hive);
+  const hEl  = document.getElementById('rg-hive-'+hive);
+  const open = sub.classList.contains('open');
+  sub.classList.toggle('open');
+  chev.classList.toggle('open');
+  if (!open) { rgSelectHive(hive); hEl.classList.add('selected'); }
+  else hEl.classList.remove('selected');
+}
+
+function rgSelectHive(hive) {
+  document.querySelectorAll('.rg-hive').forEach(h => h.classList.remove('selected'));
+  document.querySelectorAll('.rg-key').forEach(k => k.classList.remove('selected'));
+  document.getElementById('rg-hive-'+hive).classList.add('selected');
+  document.getElementById('rg-sub-'+hive).classList.add('open');
+  document.getElementById('rg-chev-'+hive).classList.add('open');
+  rgCurrentHive = hive; rgCurrentKey = null;
+  document.getElementById('rg-path').textContent = hive;
+  document.getElementById('rg-values-list').innerHTML = '';
+  document.getElementById('rg-status').textContent = `${Object.keys(registry[hive]).length} subkey(s)`;
+  document.getElementById('rg-count').textContent = '';
+}
+
+function rgSelectKey(hive, key) {
+  document.querySelectorAll('.rg-key').forEach(k => k.classList.remove('selected'));
+  document.getElementById(`rg-key-${hive}-${key}`).classList.add('selected');
+  rgCurrentHive = hive; rgCurrentKey = key;
+  document.getElementById('rg-path').textContent = `${hive}\\${key}`;
+  const values = registry[hive][key];
+  const list = document.getElementById('rg-values-list');
+  list.innerHTML = '';
+  const defaults = REGISTRY_DEFAULTS?.[hive]?.[key] || {};
+  Object.entries(values).forEach(([name, entry]) => {
+    const def = defaults[name];
+    const modified = def && JSON.stringify(entry.value) !== JSON.stringify(def.value);
+    const row = document.createElement('div');
+    row.className = 'rg-value-row';
+    let dataClass = 'rg-val-data';
+    if (entry.type === 'REG_BOOL') dataClass += entry.value ? ' bool-true' : ' bool-false';
+    if (modified) dataClass += ' modified';
+    const dispVal = entry.type === 'REG_BOOL' ? (entry.value ? 'true' : 'false') : String(entry.value);
+    row.innerHTML = `<span class="rg-val-name">${name}</span><span class="rg-val-type">${entry.type}</span><span class="${dataClass}">${dispVal}</span>`;
+    row.title = def?.desc || '';
+    row.onclick = () => rgEditValue(hive, key, name, entry);
+    list.appendChild(row);
+  });
+  const count = Object.keys(values).length;
+  document.getElementById('rg-status').textContent = def?.desc || `${hive}\\${key}`;
+  document.getElementById('rg-count').textContent = `${count} value(s)`;
+}
+
+function rgEditValue(hive, key, name, entry) {
+  if (!state.admin) { toast('ROOT required to edit registry', 'err'); return; }
+  rgEditTarget = { hive, key, name };
+  document.getElementById('rg-edit-title').textContent = `EDIT ${entry.type}`;
+  document.getElementById('rg-edit-path').textContent  = `${hive}\\${key}`;
+  document.getElementById('rg-edit-name').value = name;
+  document.getElementById('rg-edit-type').value = entry.type;
+  document.getElementById('rg-edit-warn').textContent = '';
+  const dataInput = document.getElementById('rg-edit-data');
+  const def = REGISTRY_DEFAULTS?.[hive]?.[key]?.[name];
+  document.getElementById('rg-edit-data-label').textContent = def?.desc ? `VALUE DATA  (${def.desc})` : 'VALUE DATA';
+  if (entry.type === 'REG_BOOL') {
+    dataInput.value = entry.value ? 'true' : 'false';
+    dataInput.placeholder = 'true or false';
+  } else {
+    dataInput.value = String(entry.value);
+    dataInput.placeholder = entry.type === 'REG_DWORD' ? 'integer' : 'string';
+  }
+  document.getElementById('rg-edit-modal').classList.remove('hidden');
+  dataInput.focus(); dataInput.select();
+}
+
+function rgEditCancel() {
+  document.getElementById('rg-edit-modal').classList.add('hidden');
+  rgEditTarget = null;
+}
+
+function rgEditSave() {
+  if (!rgEditTarget) return;
+  const { hive, key, name } = rgEditTarget;
+  const raw  = document.getElementById('rg-edit-data').value.trim();
+  const warn = document.getElementById('rg-edit-warn');
+  const entry = registry[hive][key][name];
+  warn.textContent = '';
+  let newVal;
+  if (entry.type === 'REG_BOOL') {
+    if (!['true','false','1','0'].includes(raw.toLowerCase())) { warn.textContent = 'Enter true or false'; return; }
+    newVal = raw.toLowerCase() === 'true' || raw === '1';
+  } else if (entry.type === 'REG_DWORD') {
+    newVal = parseInt(raw);
+    if (isNaN(newVal)) { warn.textContent = 'Must be an integer'; return; }
+  } else {
+    newVal = raw;
+  }
+  regSet(hive, key, name, newVal);
+  document.getElementById('rg-edit-modal').classList.add('hidden');
+  rgEditTarget = null;
+  rgSelectKey(hive, key);
+  toast(`${name} updated`, 'ok');
+}
+
+document.getElementById('rg-edit-data').addEventListener('keydown', e => {
+  if (e.key === 'Enter') rgEditSave();
+  if (e.key === 'Escape') rgEditCancel();
+});
+
+function rgMenuFile() { toast('reg export — use terminal: reg export [file]', 'ok', 3000); }
+function rgMenuEdit() { toast('Double-click any value to edit', 'ok', 2500); }
+function rgMenuFind() { toast('Use terminal: reg query [path]', 'ok', 2500); }
+function rgMenuHelp() { toast('terminal: man reg | man regedit', 'ok', 2500); }
 
 let installedSoftware = JSON.parse(localStorage.getItem('tscpp_software') || '[]');
 function saveSoftware() { localStorage.setItem('tscpp_software', JSON.stringify(installedSoftware)); }
@@ -2173,8 +2616,11 @@ function buildMap() {
 
 setInterval(() => {
   if (state.locked) return;
-  document.getElementById('sb-cpu').textContent  = rand(12,88)+'%';
-  document.getElementById('sb-mem').textContent  = rand(40,78)+'%';
+  const efx = getHWEffects();
+  const cpuLoad = hasSoftware('heat-daemon') ? rand(12,55) : rand(12,88);
+  const memLoad = efx.ramWarn ? rand(70,95) : rand(40,78);
+  document.getElementById('sb-cpu').textContent  = cpuLoad+'%';
+  document.getElementById('sb-mem').textContent  = memLoad+'%';
   document.getElementById('sb-pkt').textContent  = state.hasWifi ? rand(80,400) : '0';
   document.getElementById('sb-node').textContent = state.currentServer;
   const ul = document.getElementById('sb-uplink');
@@ -2183,10 +2629,12 @@ setInterval(() => {
   document.getElementById('dot-uplink').className = 'bar-dot' + (state.hasWifi ? ' active' : '');
   document.getElementById('dot-admin').className  = 'bar-dot' + (state.admin ? ' amber' : '');
   document.getElementById('dot-tunnel').className = 'bar-dot' + (state.tunnelActive ? ' active' : '');
-  if (state.traceRisk > 0 && Math.random() < 0.1) {
+  const decayChance = hasSoftware('ghost-kernel') ? 0.2 : 0.1;
+  if (state.traceRisk > 0 && Math.random() < decayChance) {
     state.traceRisk = Math.max(0, state.traceRisk - 1);
     updateRisk();
   }
+  if (memLoad >= 90) toast('WARNING: Memory pressure critical', 'warn', 3000);
 }, 1500);
 
 function updateRisk() {
@@ -2557,7 +3005,7 @@ async function bootSequence() {
   updateRisk();
 
   const lines = [
-    ['>> TSCPP BIOS v8.0 — INITIALIZING...','sys'],
+    ['>> TSCPP BIOS v9.0 — INITIALIZING...','sys'],
     ['>> CPU CHECK........ [ 8-CORE / 4.2GHz ]  [ OK ]','sys'],
     ['>> RAM CHECK........ [ 32GB DDR5 ECC ]     [ OK ]','sys'],
     ['>> DISK CHECK....... [ 2TB NVME RAID-1 ]   [ OK ]','sys'],
@@ -2686,7 +3134,7 @@ async function processCommand(raw) {
     case 'help': {
       if (args[1]) { printUsage(args[1]); break; }
       printSep();
-      await typePrint('TSCPP TERMINAL v8.0 — COMMAND REFERENCE', 'sys', 6);
+      await typePrint('TSCPP TERMINAL v9.0 — COMMAND REFERENCE', 'sys', 6);
       print('  TIP: Type "help [command]" or "man [command]" for detailed usage.', 'dim');
       printSep();
       const groups = [
@@ -3011,15 +3459,17 @@ async function processCommand(raw) {
 
     case 'bruteforce': {
       if (!state.hasWifi) { print('ERR: NO UPLINK.', 'err'); break; }
-      const target = args[1] || 'TARGET';
-      await typePrint(`BRUTE FORCE: ${target}`, 'sys');
-      const attempts = rand(200,800);
-      for (let i=0;i<5;i++) {
-        await sleep(150);
-        print(`  >> BATCH ${i+1}/5 — ${rand(40,160)} attempts — PASS:${randHex(4).toLowerCase()}`, 'sys');
+      const bfTarget  = args[1] || 'TARGET';
+      const bfBoosted = hasSoftware('bruteX');
+      const bfBatches = bfBoosted ? 3 : 5;
+      const bfAttempts = rand(bfBoosted ? 50 : 200, bfBoosted ? 200 : 800);
+      await typePrint(`CREDENTIAL ATTACK: ${bfTarget}${bfBoosted ? ' [BruteX ACTIVE]' : ''}`, 'sys');
+      for (let i=0;i<bfBatches;i++) {
+        await sleep(bfBoosted ? 80 : 150);
+        print(`  >> BATCH ${i+1}/${bfBatches} — ${rand(40,160)} attempts — PASS:${randHex(4).toLowerCase()}`, 'sys');
       }
       bumpRisk(rand(20,35));
-      await typePrint(`${attempts} ATTEMPTS — CREDENTIALS FOUND: admin:${randHex(4).toLowerCase()}`, 'success');
+      await typePrint(`${bfAttempts} TOTAL — CREDENTIALS FOUND: admin:${randHex(4).toLowerCase()}`, 'success');
       break;
     }
 
@@ -3043,10 +3493,16 @@ async function processCommand(raw) {
 
     case 'crack': {
       if (!args[1]) { print('USAGE: crack [hash]', 'err'); break; }
-      await typePrint(`CRACKING: ${args[1]}`, 'sys');
-      for (let i=0;i<4;i++) { await sleep(150); print(`  >> WORDLIST ${i+1}/4 — ${rand(10000,99999)} hashes/sec`, 'sys'); }
+      const ckBoosted = hasSoftware('crack-suite');
+      const ckPasses  = ckBoosted ? 2 : 4;
+      await typePrint(`CRACKING: ${args[1]}${ckBoosted ? ' [CrackSuite ACTIVE]' : ''}`, 'sys');
+      for (let i=0;i<ckPasses;i++) {
+        await sleep(150);
+        const rate = ckBoosted ? rand(500000,2000000) : rand(10000,99999);
+        print(`  >> WORDLIST ${i+1}/${ckPasses} — ${rate.toLocaleString()} hashes/sec`, 'sys');
+      }
       bumpRisk(rand(10,20));
-      await typePrint(`PLAINTEXT: ${['password','tscpp123','agent00','letmein'][rand(0,3)]}`, 'success');
+      await typePrint(`PLAINTEXT: ${['password','tscpp123','agent00','letmein','hunter2','tscpp!99'][rand(0,5)]}`, 'success');
       break;
     }
 
@@ -3161,6 +3617,13 @@ async function processCommand(raw) {
       if (!dirs.includes(wDir)) { print(`ERR: Directory '${wDir}' does not exist.`, 'err'); break; }
       if (!canWrite(wDir)) { print(`ERR: Permission denied — '${wDir}' requires ROOT.`, 'err'); break; }
       if (isSystemFile(wName) && !state.admin) { print(`ERR: Permission denied — '${wName}' requires ROOT.`, 'err'); break; }
+      const efxW = getHWEffects();
+      const userFileCount = Object.keys(files).filter(f => !isSystemFile(f)).length;
+      if (!isSystemFile(wName) && !files[wName] && userFileCount >= efxW.maxFiles) {
+        print(`ERR: File limit reached (${efxW.maxFiles} files). Your RAM tier is too low.`, 'err');
+        print(`  Install ram-optim from tscpp://store or upgrade RAM to increase limit.`, 'dim');
+        break;
+      }
       const newContent = args.slice(2).join(' ');
       files[wName] = newContent;
       fileLocations[wName] = wDir;
@@ -3384,17 +3847,25 @@ async function processCommand(raw) {
       await typePrint(`PROCESS ${args[1]} TERMINATED.`, 'admin');
       break;
 
-    case 'sysinfo':
+    case 'sysinfo': {
+      const si_cpu = selectedHW ? HW_CATALOG.cpu.find(c=>c.id===selectedHW.cpu) : null;
+      const si_gpu = selectedHW ? HW_CATALOG.gpu.find(g=>g.id===selectedHW.gpu) : null;
+      const si_ram = selectedHW ? HW_CATALOG.ram.find(r=>r.id===selectedHW.ram) : null;
+      const efx    = getHWEffects();
       printSep();
-      print(`  OS       : TSCPP-OS 5.0 (based on Debian 12)`, 'sys');
+      print(`  OS       : TSCPP-OS 5.0 (Debian 12)`, 'sys');
       print(`  KERNEL   : 6.5.0-tscpp-amd64`, 'sys');
-      print(`  CPU      : Intel Xeon E5-2699 v4 @ 2.2GHz x22`, 'sys');
-      print(`  RAM      : 128GB DDR4 ECC | USED: ${rand(30,70)}GB`, 'sys');
+      print(`  CPU      : ${si_cpu ? si_cpu.name+' — '+si_cpu.cores+' @ '+si_cpu.clock : 'Unknown'}`, 'sys');
+      print(`  GPU      : ${si_gpu ? si_gpu.name+' — '+si_gpu.vram : 'Unknown'}`, 'sys');
+      print(`  RAM      : ${si_ram ? si_ram.name+' ('+si_ram.kit+' @ '+si_ram.speed+')' : 'Unknown'} | USED: ${rand(30,70)}%`, 'sys');
       print(`  DISK     : /dev/nvme0n1 2TB | ${rand(100,800)}GB FREE`, 'sys');
-      print(`  NETWORK  : ${state.hasWifi?'ONLINE':'OFFLINE'} | ${state.tunnelActive?'TUNNEL ACTIVE':'NO TUNNEL'}`, 'sys');
+      print(`  NETWORK  : ${state.hasWifi?'ONLINE':'OFFLINE'} | ${state.tunnelActive?'TUNNEL → '+state.currentServer:'NO TUNNEL'}`, 'sys');
       print(`  UPTIME   : ${rand(1,99)}d ${rand(0,23)}h ${rand(0,59)}m`, 'sys');
+      print(`  HW SCORE : CPU ${si_cpu?.tier||'?'}/6  GPU ${si_gpu?.tier||'?'}/6  RAM ${si_ram?.tier||'?'}/6`, efx.bottlenecked?'warn':'sys');
+      print(`  SOFTWARE : ${installedSoftware.length} package(s) installed`, 'sys');
       printSep();
       break;
+    }
 
     case 'encode':
       if (!state.admin) { print('ERR: ROOT REQUIRED.', 'err'); break; }
@@ -3690,10 +4161,12 @@ async function processCommand(raw) {
       localStorage.removeItem('tscpp_locs');
       localStorage.removeItem('tscpp_master_key');
       localStorage.removeItem('tscpp_root_key');
+      localStorage.removeItem('tscpp_software');
+      localStorage.removeItem('tscpp_hardware');
 
       Object.keys(files).forEach(k => delete files[k]);
       Object.assign(files, {
-        "welcome.txt": "TSCPP Terminal v8.0 — Connection required for cloud sync.",
+        "welcome.txt": "TSCPP Terminal v9.0 — Connection required for cloud sync.",
         "note.txt":    "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
         "readme.md":   "Welcome agent. Type HELP for command reference.",
       }, SYSTEM_FILES);
