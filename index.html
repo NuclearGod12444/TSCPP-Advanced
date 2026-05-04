@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSCPP Advanced Terminal v10.0</title>
+<title>TSCPP Advanced Terminal v11.0</title>
 <link rel="icon" type="image/png" href="TSCPP.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
@@ -168,6 +168,104 @@
   .stat-val { color: var(--green-dim); }
   .stat-val.on { color: var(--green); }
   .stat-val.err { color: var(--red); }
+
+  #sidebar {
+    width: 200px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.2s;
+  }
+  #sidebar.collapsed { width: 0; }
+  #sidebar-inner { overflow-y: auto; flex: 1; display: flex; flex-direction: column; }
+  #sidebar-inner::-webkit-scrollbar { width: 2px; }
+  #sidebar-inner::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .sb-tab-bar {
+    display: flex; flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    background: #060a06;
+  }
+  .sb-tab {
+    flex: 1; padding: 6px 4px; font-size: 9px; text-align: center;
+    color: #2a4a2a; cursor: pointer; letter-spacing: 1px;
+    font-family: 'Orbitron', monospace;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .sb-tab:hover { color: var(--green-dim); }
+  .sb-tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+  .sb-panel { display: none; flex-direction: column; flex: 1; }
+  .sb-panel.active { display: flex; }
+
+  .sidebar-section { padding: 6px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .sidebar-title { font-size: 9px; letter-spacing: 2px; color: #333; padding: 4px 10px 5px; font-family: 'Orbitron', monospace; }
+  .sidebar-item {
+    padding: 4px 10px; font-size: 11px; color: #3a5a3a;
+    cursor: pointer; display: flex; align-items: center; gap: 7px;
+    transition: background 0.1s, color 0.1s; user-select: none;
+  }
+  .sidebar-item:hover { background: rgba(0,255,65,0.05); color: var(--green-dim); }
+  .sidebar-item.active { color: var(--green); background: rgba(0,255,65,0.08); }
+  .sidebar-item .si-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .sidebar-item .si-icon { font-size: 10px; flex-shrink: 0; opacity: 0.7; }
+  .sidebar-item .si-badge {
+    margin-left: auto; font-size: 8px; padding: 1px 4px;
+    border-radius: 2px; font-family: 'Orbitron', monospace;
+  }
+  .si-badge.ok  { background: var(--green-dark); color: var(--green-dim); }
+  .si-badge.err { background: #2a0000; color: var(--red); }
+  .si-badge.warn { background: #2a1a00; color: var(--amber); }
+
+  .sb-dir-item {
+    padding: 3px 10px 3px 18px; font-size: 11px; color: #2a5a2a;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: background 0.1s, color 0.1s;
+  }
+  .sb-dir-item:hover { background: rgba(0,255,65,0.04); color: var(--green-dim); }
+  .sb-dir-item.cwd { color: var(--green); font-weight: bold; }
+
+  .tut-card {
+    margin: 6px 8px; border: 1px solid var(--border);
+    padding: 8px 10px; background: #060a06; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .tut-card:hover { border-color: var(--green-dark); }
+  .tut-card.done { opacity: 0.45; }
+  .tut-card-title { font-size: 10px; color: var(--green-dim); margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; }
+  .tut-card-desc { font-size: 10px; color: #3a5a3a; line-height: 1.5; }
+  .tut-check { color: var(--green); font-size: 10px; }
+  .tut-progress-wrap { padding: 8px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tut-progress-label { font-size: 9px; color: #2a4a2a; margin-bottom: 4px; display: flex; justify-content: space-between; font-family: 'Orbitron', monospace; }
+  .tut-bar { height: 3px; background: var(--green-dark); }
+  .tut-fill { height: 100%; background: var(--green); transition: width 0.4s; }
+
+  #mp-node-detail {
+    font-size: 10px; color: #2a4a2a; padding: 6px 8px;
+    border: 1px solid var(--border); background: #060a06;
+    min-height: 36px; margin: 4px 0; line-height: 1.6;
+  }
+  .mp-quick-btn {
+    background: var(--green-dark); border: 1px solid var(--border);
+    color: var(--green-dim); font-family: 'Orbitron', monospace;
+    font-size: 8px; padding: 3px 7px; cursor: pointer; letter-spacing: 1px;
+    transition: all 0.15s; text-align: center;
+  }
+  .mp-quick-btn:hover { background: var(--green-dim); color: var(--bg); }
+  .mp-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .mp-stat-cell {
+    background: #060a06; border: 1px solid var(--border);
+    padding: 4px 6px; font-size: 9px;
+  }
+  .mp-stat-cell-label { color: #2a4a2a; margin-bottom: 1px; letter-spacing: 1px; }
+  .mp-stat-cell-val { color: var(--green-dim); font-size: 11px; }
+  .mp-stat-cell-val.ok { color: var(--green); }
+  .mp-stat-cell-val.err { color: var(--red); }
+  .mp-stat-cell-val.warn { color: var(--amber); }
 
   /* Terminal pane */
   #term-wrap {
@@ -1066,7 +1164,7 @@
     <div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div><div class="lock-bar"></div>
   </div>
   <div class="lock-logo">TSCPP</div>
-  <div class="lock-sub">ADVANCED TERMINAL v10.0</div>
+  <div class="lock-sub">ADVANCED TERMINAL v11.0</div>
   <div class="lock-input-wrap" id="lock-wrap">
     <span style="color:#1e3e1e;font-size:11px;">KEY:</span>
     <input type="password" id="lock-input" autofocus autocomplete="off" placeholder="ENTER ACCESS KEY">
@@ -1180,30 +1278,126 @@
   <div id="main">
     <!-- Sidebar -->
     <div id="sidebar">
-      <div class="sidebar-section">
-        <div class="sidebar-title">NETWORK</div>
-        <div class="sidebar-item" id="si-local" onclick="sidebarNav('LOCAL')"><div class="si-dot"></div>LOCAL NODE</div>
-        <div class="sidebar-item" id="si-targets" onclick="sidebarNav('SCAN')"><div class="si-dot"></div>SCAN RESULTS</div>
+      <div class="sb-tab-bar">
+        <div class="sb-tab active" id="sbt-nav"    onclick="sbSwitchTab('nav')">NAV</div>
+        <div class="sb-tab"        id="sbt-fs"     onclick="sbSwitchTab('fs')">FILES</div>
+        <div class="sb-tab"        id="sbt-sys"    onclick="sbSwitchTab('sys')">SYSTEM</div>
+        <div class="sb-tab"        id="sbt-tut"    onclick="sbSwitchTab('tut')">HELP</div>
       </div>
-      <div class="sidebar-section">
-        <div class="sidebar-title">FILESYSTEM</div>
-        <div class="sidebar-item" onclick="sidebarCmd('ls')"><div class="si-dot"></div>LIST FILES</div>
-        <div class="sidebar-item" onclick="sidebarCmd('sysinfo')"><div class="si-dot"></div>SYS INFO</div>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-title">TOOLS</div>
-        <div class="sidebar-item" onclick="sidebarCmd('ping 8.8.8.8')"><div class="si-dot"></div>PING TEST</div>
-        <div class="sidebar-item" onclick="sidebarCmd('trace 10.0.0.1')"><div class="si-dot"></div>TRACEROUTE</div>
-        <div class="sidebar-item" onclick="sidebarCmd('netstat')"><div class="si-dot"></div>NETSTAT</div>
-        <div class="sidebar-item" onclick="sidebarCmd('portmap')"><div class="si-dot"></div>PORT MAP</div>
-      </div>
-      <div id="stat-block">
-        <div class="sidebar-title" style="padding:0 0 4px;">LIVE STATS</div>
-        <div class="stat-row"><span>CPU</span><span class="stat-val" id="sb-cpu">--</span></div>
-        <div class="stat-row"><span>MEM</span><span class="stat-val" id="sb-mem">--</span></div>
-        <div class="stat-row"><span>PKT/S</span><span class="stat-val" id="sb-pkt">--</span></div>
-        <div class="stat-row"><span>NODE</span><span class="stat-val on" id="sb-node">LOCAL</span></div>
-        <div class="stat-row"><span>UPLINK</span><span class="stat-val err" id="sb-uplink">OFFLINE</span></div>
+      <div id="sidebar-inner">
+
+        <!-- NAV PANEL -->
+        <div class="sb-panel active" id="sbp-nav">
+          <div class="sidebar-section">
+            <div class="sidebar-title">QUICK ACTIONS</div>
+            <div class="sidebar-item" onclick="sidebarCmd('status')"><span class="si-icon">◈</span>Session Status</div>
+            <div class="sidebar-item" onclick="sidebarCmd('whoami')"><span class="si-icon">◈</span>Who Am I</div>
+            <div class="sidebar-item" onclick="sidebarCmd('syshealth')"><span class="si-icon">◈</span>System Health</div>
+            <div class="sidebar-item" onclick="sidebarCmd('specs')"><span class="si-icon">◈</span>Hardware Specs</div>
+            <div class="sidebar-item" onclick="sidebarCmd('apps')"><span class="si-icon">◈</span>Installed Apps</div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">NETWORK</div>
+            <div class="sidebar-item" onclick="sidebarCmd('scan')"><span class="si-icon">◈</span>Scan Networks<span class="si-badge ok" id="sb-uplink-badge">OFFLINE</span></div>
+            <div class="sidebar-item" onclick="sidebarCmd('netstat')"><span class="si-icon">◈</span>Connections</div>
+            <div class="sidebar-item" onclick="sidebarCmd('arp')"><span class="si-icon">◈</span>ARP Table</div>
+            <div class="sidebar-item" onclick="sidebarCmd('portmap')"><span class="si-icon">◈</span>Port Map</div>
+            <div class="sidebar-item" onclick="sidebarCmd('ping 8.8.8.8')"><span class="si-icon">◈</span>Ping Gateway</div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">TOOLS</div>
+            <div class="sidebar-item" onclick="sidebarCmd('browser')"><span class="si-icon">◈</span>Browser</div>
+            <div class="sidebar-item" onclick="sidebarCmd('regedit')"><span class="si-icon">◈</span>Registry Editor</div>
+            <div class="sidebar-item" onclick="sidebarCmd('cron list')"><span class="si-icon">◈</span>Cron Jobs</div>
+            <div class="sidebar-item" onclick="sidebarCmd('macro list')"><span class="si-icon">◈</span>Macros</div>
+            <div class="sidebar-item" onclick="sidebarCmd('history')"><span class="si-icon">◈</span>History</div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">SECURITY</div>
+            <div class="sidebar-item" onclick="sidebarCmd('vpn on')"><span class="si-icon">◈</span>VPN On</div>
+            <div class="sidebar-item" onclick="sidebarCmd('vpn off')"><span class="si-icon">◈</span>VPN Off</div>
+            <div class="sidebar-item" onclick="sidebarCmd('firewall on')"><span class="si-icon">◈</span>Firewall On</div>
+            <div class="sidebar-item" onclick="sidebarCmd('firewall off')"><span class="si-icon">◈</span>Firewall Off</div>
+            <div class="sidebar-item" onclick="sidebarCmd('panic')"><span class="si-icon">◈</span><span style="color:var(--red)">PANIC PURGE</span></div>
+          </div>
+          <div id="stat-block">
+            <div class="sidebar-title" style="padding:0 0 4px;">LIVE STATS</div>
+            <div class="stat-row"><span>CPU</span><span class="stat-val" id="sb-cpu">--</span></div>
+            <div class="stat-row"><span>MEM</span><span class="stat-val" id="sb-mem">--</span></div>
+            <div class="stat-row"><span>PKT/S</span><span class="stat-val" id="sb-pkt">--</span></div>
+            <div class="stat-row"><span>NODE</span><span class="stat-val on" id="sb-node">LOCAL</span></div>
+            <div class="stat-row"><span>UPLINK</span><span class="stat-val err" id="sb-uplink">OFFLINE</span></div>
+            <div class="stat-row"><span>RISK</span><span class="stat-val" id="sb-risk">0%</span></div>
+            <div class="stat-row"><span>FILES</span><span class="stat-val" id="sb-files">--</span></div>
+          </div>
+        </div>
+
+        <!-- FILES PANEL -->
+        <div class="sb-panel" id="sbp-fs">
+          <div class="sidebar-section">
+            <div class="sidebar-title">CURRENT DIR</div>
+            <div class="sidebar-item active" id="sb-cwd-display" style="font-size:10px;color:var(--green);word-break:break-all;flex-wrap:wrap;">~</div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">DIRECTORIES</div>
+            <div id="sb-dir-tree"></div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">DIR ACTIONS</div>
+            <div class="sidebar-item" onclick="sidebarCmd('ls')"><span class="si-icon">◈</span>List Files</div>
+            <div class="sidebar-item" onclick="sidebarCmd('pwd')"><span class="si-icon">◈</span>Print Working Dir</div>
+            <div class="sidebar-item" onclick="sbPromptMkdir()"><span class="si-icon">◈</span>New Directory</div>
+            <div class="sidebar-item" onclick="sbPromptNano()"><span class="si-icon">◈</span>New / Edit File</div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">RECENT FILES</div>
+            <div id="sb-recent-files" style="font-size:10px;color:#2a5a2a;padding:4px 10px;"></div>
+          </div>
+        </div>
+
+        <!-- SYSTEM PANEL -->
+        <div class="sb-panel" id="sbp-sys">
+          <div class="sidebar-section">
+            <div class="sidebar-title">HEALTH OVERVIEW</div>
+            <div id="sb-health-list"></div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">SYSTEM FILES</div>
+            <div class="sidebar-item" onclick="sidebarCmd('nano /sys/kernel.cfg')"><span class="si-icon">◈</span>kernel.cfg</div>
+            <div class="sidebar-item" onclick="sidebarCmd('nano /sys/firewall.rules')"><span class="si-icon">◈</span>firewall.rules</div>
+            <div class="sidebar-item" onclick="sidebarCmd('nano /etc/network.conf')"><span class="si-icon">◈</span>network.conf</div>
+            <div class="sidebar-item" onclick="sidebarCmd('nano /etc/hosts')"><span class="si-icon">◈</span>hosts</div>
+            <div class="sidebar-item" onclick="sidebarCmd('nano /etc/cron.dat')"><span class="si-icon">◈</span>cron.dat</div>
+            <div class="sidebar-item" onclick="sidebarCmd('cat /var/log/sys.log')"><span class="si-icon">◈</span>sys.log</div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">RECOVERY</div>
+            <div class="sidebar-item" onclick="sidebarCmd('syshealth')"><span class="si-icon">◈</span>Run Diagnostic</div>
+            <div class="sidebar-item" onclick="sbRestoreAll()"><span class="si-icon">◈</span>Restore All Files</div>
+            <div class="sidebar-item" onclick="sidebarCmd('regedit')"><span class="si-icon">◈</span>Open Registry</div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">REGISTRY SHORTCUTS</div>
+            <div class="sidebar-item" onclick="sidebarCmd('reg query HKEY_SYSTEM\\\\Security')"><span class="si-icon">◈</span>Security Keys</div>
+            <div class="sidebar-item" onclick="sidebarCmd('reg query HKEY_NETWORK\\\\Firewall')"><span class="si-icon">◈</span>Firewall Keys</div>
+            <div class="sidebar-item" onclick="sidebarCmd('reg query HKEY_AGENT\\\\Terminal')"><span class="si-icon">◈</span>Terminal Keys</div>
+          </div>
+        </div>
+
+        <!-- TUTORIAL PANEL -->
+        <div class="sb-panel" id="sbp-tut">
+          <div class="tut-progress-wrap">
+            <div class="tut-progress-label"><span>PROGRESS</span><span id="tut-pct">0%</span></div>
+            <div class="tut-bar"><div class="tut-fill" id="tut-bar-fill" style="width:0%"></div></div>
+          </div>
+          <div id="tut-cards-container"></div>
+          <div style="padding:8px 10px;border-top:1px solid var(--border);flex-shrink:0;">
+            <div class="sidebar-item" onclick="sidebarCmd('help')" style="padding:4px 0;"><span class="si-icon">?</span>Full Command List</div>
+            <div class="sidebar-item" onclick="sbOpenCheatsheet()" style="padding:4px 0;"><span class="si-icon">?</span>Cheatsheet</div>
+            <div class="sidebar-item" onclick="sbResetTutorials()" style="padding:4px 0;font-size:10px;color:#2a3a2a;"><span class="si-icon">↺</span>Reset Tutorials</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1221,11 +1415,25 @@
     <div id="minimap-panel">
       <div class="mp-title">NETWORK MAP</div>
       <div id="map-canvas"></div>
-      <div class="mp-title" style="margin-top:4px;">ACTIVITY LOG</div>
-      <div class="mp-log" id="mp-log"></div>
-      <div style="margin-top:4px; display:flex; flex-direction:column; gap:6px;">
+      <div id="mp-node-detail">Click a node to inspect it.</div>
+      <div style="display:flex;gap:4px;flex-shrink:0;">
+        <div class="mp-quick-btn" style="flex:1" onclick="sidebarCmd('scan')">SCAN</div>
+        <div class="mp-quick-btn" style="flex:1" onclick="sidebarCmd('netstat')">NETSTAT</div>
+        <div class="mp-quick-btn" style="flex:1" onclick="sidebarCmd('arp')">ARP</div>
+      </div>
+      <div class="mp-title" style="margin-top:6px;">LIVE METRICS</div>
+      <div class="mp-stat-grid">
+        <div class="mp-stat-cell"><div class="mp-stat-cell-label">CPU</div><div class="mp-stat-cell-val" id="mp-cpu">--</div></div>
+        <div class="mp-stat-cell"><div class="mp-stat-cell-label">MEM</div><div class="mp-stat-cell-val" id="mp-mem">--</div></div>
+        <div class="mp-stat-cell"><div class="mp-stat-cell-label">PKT/S</div><div class="mp-stat-cell-val" id="mp-pkt">--</div></div>
+        <div class="mp-stat-cell"><div class="mp-stat-cell-label">RISK</div><div class="mp-stat-cell-val" id="mp-risk">0%</div></div>
+        <div class="mp-stat-cell"><div class="mp-stat-cell-label">UPLINK</div><div class="mp-stat-cell-val err" id="mp-uplink">OFF</div></div>
+        <div class="mp-stat-cell"><div class="mp-stat-cell-label">TUNNEL</div><div class="mp-stat-cell-val err" id="mp-tunnel">OFF</div></div>
+      </div>
+      <div class="mp-title" style="margin-top:6px;">STATUS BARS</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
         <div class="prog-wrap">
-          <div class="prog-label"><span>ENCRYPTION</span><span id="enc-pct">100%</span></div>
+          <div class="prog-label"><span>ENCRYPT</span><span id="enc-pct">100%</span></div>
           <div class="prog-bar"><div class="prog-fill" id="enc-fill" style="width:100%"></div></div>
         </div>
         <div class="prog-wrap">
@@ -1237,6 +1445,8 @@
           <div class="prog-bar"><div class="prog-fill red" id="tr-fill" style="width:0%"></div></div>
         </div>
       </div>
+      <div class="mp-title" style="margin-top:6px;">ACTIVITY LOG</div>
+      <div class="mp-log" id="mp-log"></div>
     </div>
   </div>
 </div>
@@ -1333,7 +1543,7 @@ const FILE_CONSEQUENCES = {
 };
 
 let files = JSON.parse(localStorage.getItem('tscpp_files') || 'null') || {
-  "welcome.txt":  "TSCPP Terminal v10.0 — Connection required for cloud sync.",
+  "welcome.txt":  "TSCPP Terminal v11.0 — Connection required for cloud sync.",
   "note.txt":     "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
   "readme.md":    "Welcome agent. Type HELP for command reference.",
 };
@@ -2616,6 +2826,13 @@ function buildMap() {
     Object.assign(line.style, {left:x1+'px',top:y1+'px',width:len+'px',transform:`rotate(${angle}deg)`});
     canvas.appendChild(line);
   });
+  const nodeInfo = {
+    local: { label:'LOCAL NODE',  ip:'127.0.0.1',      desc:'Your machine. Home base.' },
+    gw:    { label:'GATEWAY',     ip:'10.0.0.1',       desc:'Network gateway. Hack a net to activate.' },
+    ext1:  { label:'EXT-NODE-1',  ip:'10.0.1.5',       desc:'TSCPP Relay-A. Tunnel destination.' },
+    ext2:  { label:'EXT-NODE-2',  ip:'10.0.2.8',       desc:'TSCPP Relay-B. Secondary hop.' },
+    tgt:   { label:'TARGET',      ip:'10.99.0.1',      desc:'Unknown entity. Hostile?' },
+  };
   mapNodes.forEach(n => {
     const node = document.createElement('div');
     node.className = 'map-node' + (n.id==='local'?' active':'');
@@ -2623,31 +2840,63 @@ function buildMap() {
     node.title = n.label;
     const W2=canvas.offsetWidth||198;
     Object.assign(node.style, {left:((n.x/200)*W2-4)+'px', top:((n.y/120)*H-4)+'px'});
+    node.onclick = () => {
+      const info = nodeInfo[n.id] || { label:n.label, ip:'?', desc:'Unknown node.' };
+      const detail = document.getElementById('mp-node-detail');
+      if (detail) {
+        detail.innerHTML = `<span style="color:var(--green-dim)">${info.label}</span><br>` +
+          `<span style="color:#2a4a2a">IP: ${info.ip}</span><br>` +
+          `<span style="color:#1e3e1e">${info.desc}</span>`;
+      }
+    };
     canvas.appendChild(node);
   });
 }
 
 setInterval(() => {
   if (state.locked) return;
-  const efx = getHWEffects();
+  const efx     = getHWEffects();
   const cpuLoad = hasSoftware('heat-daemon') ? rand(12,55) : rand(12,88);
   const memLoad = efx.ramWarn ? rand(70,95) : rand(40,78);
-  document.getElementById('sb-cpu').textContent  = cpuLoad+'%';
-  document.getElementById('sb-mem').textContent  = memLoad+'%';
-  document.getElementById('sb-pkt').textContent  = state.hasWifi ? rand(80,400) : '0';
-  document.getElementById('sb-node').textContent = state.currentServer;
+  const pktVal  = state.hasWifi ? rand(80,400) : 0;
+  const riskPct = Math.min(100, state.traceRisk) + '%';
+
+  const set = (id, val, cls) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    if (cls) el.className = cls;
+  };
+
+  set('sb-cpu',  cpuLoad+'%');
+  set('sb-mem',  memLoad+'%');
+  set('sb-pkt',  pktVal);
+  set('sb-node', state.currentServer);
+  set('sb-risk', riskPct, 'stat-val ' + (state.traceRisk >= 70 ? 'err' : state.traceRisk >= 40 ? 'on' : 'stat-val'));
+  set('sb-files', Object.keys(files).filter(f=>!isSystemFile(f)).length);
+
   const ul = document.getElementById('sb-uplink');
-  ul.textContent  = state.hasWifi ? 'ONLINE' : 'OFFLINE';
-  ul.className    = 'stat-val ' + (state.hasWifi ? 'on' : 'err');
+  if (ul) { ul.textContent = state.hasWifi ? 'ONLINE' : 'OFFLINE'; ul.className = 'stat-val ' + (state.hasWifi ? 'on' : 'err'); }
+
   document.getElementById('dot-uplink').className = 'bar-dot' + (state.hasWifi ? ' active' : '');
   document.getElementById('dot-admin').className  = 'bar-dot' + (state.admin ? ' amber' : '');
   document.getElementById('dot-tunnel').className = 'bar-dot' + (state.tunnelActive ? ' active' : '');
+
+  set('mp-cpu',    cpuLoad+'%',    'mp-stat-cell-val ' + (cpuLoad > 80 ? 'warn' : 'ok'));
+  set('mp-mem',    memLoad+'%',    'mp-stat-cell-val ' + (memLoad > 85 ? 'err'  : 'ok'));
+  set('mp-pkt',    pktVal || '0');
+  set('mp-risk',   riskPct,        'mp-stat-cell-val ' + (state.traceRisk >= 70 ? 'err' : state.traceRisk >= 40 ? 'warn' : ''));
+  set('mp-uplink', state.hasWifi ? 'ON' : 'OFF',   'mp-stat-cell-val ' + (state.hasWifi ? 'ok' : 'err'));
+  set('mp-tunnel', state.tunnelActive ? 'ON' : 'OFF', 'mp-stat-cell-val ' + (state.tunnelActive ? 'ok' : 'err'));
+
+  sbUpdateUplink();
+
   const decayChance = hasSoftware('ghost-kernel') ? 0.2 : 0.1;
   if (state.traceRisk > 0 && Math.random() < decayChance) {
     state.traceRisk = Math.max(0, state.traceRisk - 1);
     updateRisk();
   }
-  if (memLoad >= 90) toast('WARNING: Memory pressure critical', 'warn', 3000);
+  if (memLoad >= 90 && Math.random() < 0.2) toast('WARNING: Memory pressure critical', 'warn', 3000);
 }, 1500);
 
 function updateRisk() {
@@ -3019,7 +3268,7 @@ async function bootSequence() {
   applyRegistryEffects();
 
   const lines = [
-    ['>> TSCPP BIOS v10.0 — INITIALIZING...','sys'],
+    ['>> TSCPP BIOS v11.0 — INITIALIZING...','sys'],
     ['>> CPU CHECK........ [ 8-CORE / 4.2GHz ]  [ OK ]','sys'],
     ['>> RAM CHECK........ [ 32GB DDR5 ECC ]     [ OK ]','sys'],
     ['>> DISK CHECK....... [ 2TB NVME RAID-1 ]   [ OK ]','sys'],
@@ -3051,14 +3300,23 @@ async function bootSequence() {
     glitchScreen();
   }
 
+  const tutDoneCount = Object.keys(tutProgress).length;
+  if (tutDoneCount < 3) {
+    await sleep(300);
+    print('', '');
+    print('  ★ NEW HERE? Open the HELP tab in the sidebar for step-by-step tutorials.', 'dim');
+    print('  ★ Or type: help — for a full command reference.', 'dim');
+    print('  ★ Quick start: scan → hack 03 → wifi-override → tunnel 10.0.0.1', 'dim');
+  }
+
   updatePrompt();
 }
 
 function updatePrompt() {
-  const user    = state.admin ? 'ROOT' : 'AGENT';
-  const sym     = state.admin ? ':#'   : ':~$';
- 
-  const short   = state.cwd.replace('/home/agent', '~').replace('/home/agent', '~') || '/';
+  const uname = regGet('HKEY_AGENT','Profile','Username') || 'AGENT';
+  const user  = state.admin ? 'ROOT' : uname;
+  const sym   = state.admin ? ':#' : ':~$';
+  const short = state.cwd.replace('/home/agent','~') || '/';
   promptSpan.textContent = `${user}@${state.currentServer} ${short}${sym}`;
   promptSpan.className   = state.admin ? 'root' : '';
   document.getElementById('sb-node').textContent = state.currentServer;
@@ -3072,13 +3330,283 @@ function updatePrompt() {
     threatBadge.textContent = 'THREAT: RESTRICTED';
     threatBadge.className   = '';
   }
+  sbUpdateUplink();
   saveState();
 }
 
-function sidebarNav(target) {
-  if (target === 'SCAN') processCommand('scan');
-}
+function sidebarNav(target) { if (target === 'SCAN') processCommand('scan'); }
 function sidebarCmd(cmd) { processCommand(cmd); cmdInput.focus(); }
+
+function sbSwitchTab(name) {
+  ['nav','fs','sys','tut'].forEach(t => {
+    document.getElementById('sbt-'+t).classList.toggle('active', t===name);
+    document.getElementById('sbp-'+t).classList.toggle('active', t===name);
+  });
+  if (name === 'fs')  sbRefreshFilePanel();
+  if (name === 'sys') sbRefreshSysPanel();
+  if (name === 'tut') sbRefreshTutPanel();
+}
+
+function sbRefreshFilePanel() {
+  const cwdEl = document.getElementById('sb-cwd-display');
+  if (cwdEl) cwdEl.textContent = state.cwd.replace('/home/agent','~') || '/';
+  const treeEl = document.getElementById('sb-dir-tree');
+  if (treeEl) {
+    treeEl.innerHTML = '';
+    const sorted = [...dirs].sort();
+    sorted.forEach(d => {
+      const item = document.createElement('div');
+      item.className = 'sb-dir-item' + (d === state.cwd ? ' cwd' : '');
+      item.textContent = (d === state.cwd ? '▶ ' : '  ') + d.replace('/home/agent','~');
+      item.onclick = () => { processCommand('cd '+d); sbRefreshFilePanel(); cmdInput.focus(); };
+      treeEl.appendChild(item);
+    });
+  }
+  const recentEl = document.getElementById('sb-recent-files');
+  if (recentEl) {
+    const cwdFiles = filesInDir(state.cwd);
+    recentEl.innerHTML = cwdFiles.length
+      ? cwdFiles.map(f => `<div style="padding:1px 0;cursor:pointer;" onclick="processCommand('cat ${f}');cmdInput.focus();">${isSystemFile(f)?'⚙ ':'  '}${f}</div>`).join('')
+      : '<span style="color:#1e3e1e;">(empty)</span>';
+  }
+}
+
+function sbRefreshSysPanel() {
+  const listEl = document.getElementById('sb-health-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  const labels = { kernel:'KERNEL', firewall:'FIREWALL', auth:'AUTH', network:'NETWORK',
+                   encryption:'ENCRYPT', boot:'BOOT', log:'LOG', hosts:'HOSTS', cron:'CRON' };
+  Object.entries(sysHealth).forEach(([k,v]) => {
+    const el = document.createElement('div');
+    el.className = 'sidebar-item';
+    el.style.fontSize = '10px';
+    el.innerHTML = `<span class="si-icon">${v?'●':'●'}</span>${(labels[k]||k).padEnd(10)}<span class="si-badge ${v?'ok':'err'}">${v?'OK':'!!'}</span>`;
+    if (!v) el.style.color = 'var(--red)';
+    el.onclick = () => processCommand('restore '+k+'.cfg');
+    listEl.appendChild(el);
+  });
+}
+
+function sbRestoreAll() {
+  if (!state.admin) { toast('ROOT required to restore files', 'err'); return; }
+  Object.keys(SYSTEM_FILES).forEach(f => {
+    files[f] = SYSTEM_FILES[f];
+    (FILE_CONSEQUENCES[f]?.erase?.effects || []).forEach(e => { sysHealth[e] = true; });
+  });
+  saveFiles(); saveSysHealth();
+  sbRefreshSysPanel();
+  toast('All system files restored', 'ok');
+  processCommand('syshealth');
+}
+
+function sbPromptMkdir() {
+  const name = prompt('New directory path (e.g. /tmp/mydir):');
+  if (name) { processCommand('mkdir '+name); sbRefreshFilePanel(); }
+}
+
+function sbPromptNano() {
+  const name = prompt('File to open/create (e.g. note.txt or /tmp/x.txt):');
+  if (name) processCommand('nano '+name);
+}
+
+const TUTORIALS = [
+  { id:'boot',    title:'1. Boot & Unlock',       done:false,
+    desc:'Enter your terminal access key on the lock screen to get in.',
+    steps:['The lock screen appears every time you open the terminal.',
+           'Type your access key and press Enter.',
+           'You\'ll see the boot sequence, then the prompt.',
+           'Try: whoami — to see your current identity.'],
+    cmd:'whoami' },
+  { id:'network', title:'2. Get Online',           done:false,
+    desc:'Discover and connect to a nearby network to unlock most commands.',
+    steps:['Run scan to find nearby networks.',
+           'Pick a network ID from the list.',
+           'Run hack [id] to connect — e.g. hack 03.',
+           'Run wifi-override to escalate your access.'],
+    cmd:'scan' },
+  { id:'files',   title:'3. Navigate Files',       done:false,
+    desc:'Move around the filesystem and read system files.',
+    steps:['Run ls to list files in your current directory.',
+           'Run cd /sys to move to the system directory.',
+           'Run cat kernel.cfg to read a system file.',
+           'Run nano note.txt to edit or create a file.'],
+    cmd:'ls' },
+  { id:'root',    title:'4. Become Root',          done:false,
+    desc:'Elevate to ROOT to unlock the most powerful commands.',
+    steps:['Run login and enter your root key.',
+           'Your prompt changes to ROOT@ and turns amber.',
+           'Now you can edit system files, use regedit, download, locate, and more.',
+           'Run logout when done to drop back to agent.'],
+    cmd:'login' },
+  { id:'sysfile', title:'5. Edit a System File',   done:false,
+    desc:'Use nano to edit a live system file and watch it take effect.',
+    steps:['Run login first — ROOT is required.',
+           'Run nano /etc/hosts to open the hosts editor.',
+           'Add a line like: 10.0.0.5 target',
+           'Press Ctrl+S to save. Now ping target will resolve it.',
+           'Run syshealth to check file integrity.'],
+    cmd:'nano /etc/hosts' },
+  { id:'registry',title:'6. Use the Registry',     done:false,
+    desc:'Change live system settings through the registry editor.',
+    steps:['Run login to become ROOT.',
+           'Run regedit to open the visual editor.',
+           'Navigate HKEY_AGENT > Terminal > Theme.',
+           'Double-click Theme and type: amber',
+           'Or use: reg set HKEY_AGENT\\Terminal\\Theme amber'],
+    cmd:'regedit' },
+  { id:'tunnel',  title:'7. Open a Tunnel',        done:false,
+    desc:'Reach remote nodes by chaining hack → wifi-override → tunnel.',
+    steps:['Run scan, then hack [id], then wifi-override.',
+           'Run tunnel [ip] — e.g. tunnel 10.0.0.5.',
+           'Your prompt updates to show the remote node.',
+           'Run browser dark://market to access the dark web.'],
+    cmd:'tunnel 10.0.0.5' },
+  { id:'browser', title:'8. Open the Browser',     done:false,
+    desc:'Browse TSCPP-Net and download software to boost your capabilities.',
+    steps:['Get online first with scan → hack [id].',
+           'Run browser or click Browser in the NAV sidebar.',
+           'Visit tscpp://store to download free software.',
+           'Installed apps boost commands like crack, vpn, proxy.'],
+    cmd:'browser' },
+  { id:'health',  title:'9. Handle System Damage', done:false,
+    desc:'If you erase or corrupt a system file, here\'s how to recover.',
+    steps:['Run syshealth to see what\'s broken.',
+           'Run restore [file] — e.g. restore firewall.rules (ROOT required).',
+           'Or open nano [file] and fix the contents manually.',
+           'Use the SYSTEM tab in the sidebar for quick access.'],
+    cmd:'syshealth' },
+  { id:'macro',   title:'10. Record a Macro',      done:false,
+    desc:'Automate repetitive command sequences with macros.',
+    steps:['Run macro record myflow to start recording.',
+           'Run any sequence of commands.',
+           'Run macro stop to save.',
+           'Run macro run myflow to replay it any time.',
+           'Run macro list to see all saved macros.'],
+    cmd:'macro list' },
+];
+
+let tutProgress = JSON.parse(localStorage.getItem('tscpp_tutorials') || 'null') || {};
+function saveTutProgress() { localStorage.setItem('tscpp_tutorials', JSON.stringify(tutProgress)); }
+
+function sbRefreshTutPanel() {
+  const container = document.getElementById('tut-cards-container');
+  if (!container) return;
+  container.innerHTML = '';
+  const done = TUTORIALS.filter(t => tutProgress[t.id]).length;
+  const pct  = Math.round((done / TUTORIALS.length) * 100);
+  const fill = document.getElementById('tut-bar-fill');
+  const pctEl = document.getElementById('tut-pct');
+  if (fill)  fill.style.width  = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+
+  TUTORIALS.forEach(tut => {
+    const isDone = !!tutProgress[tut.id];
+    const card = document.createElement('div');
+    card.className = 'tut-card' + (isDone ? ' done' : '');
+    card.innerHTML = `
+      <div class="tut-card-title">
+        <span>${tut.title}</span>
+        <span class="tut-check">${isDone ? '✓ DONE' : ''}</span>
+      </div>
+      <div class="tut-card-desc">${tut.desc}</div>
+    `;
+    card.onclick = () => sbShowTutorial(tut);
+    container.appendChild(card);
+  });
+}
+
+function sbShowTutorial(tut) {
+  output.innerHTML = '';
+  print('', '');
+  print('╔══ TUTORIAL: ' + tut.title + ' ' + '═'.repeat(Math.max(0, 44-tut.title.length)) + '╗', 'sep');
+  print('║  ' + tut.desc, 'sys');
+  print('╠' + '═'.repeat(52) + '╣', 'sep');
+  tut.steps.forEach((s, i) => print(`║  ${i+1}. ${s}`, ''));
+  print('╠' + '═'.repeat(52) + '╣', 'sep');
+  print(`║  SUGGESTED COMMAND: ${tut.cmd}`, 'admin');
+  print('╚' + '═'.repeat(52) + '╝', 'sep');
+  print('', '');
+  tutProgress[tut.id] = true;
+  saveTutProgress();
+  sbRefreshTutPanel();
+  cmdInput.value = tut.cmd;
+  cmdInput.focus();
+}
+
+function sbResetTutorials() {
+  tutProgress = {};
+  saveTutProgress();
+  sbRefreshTutPanel();
+  toast('Tutorials reset', 'ok');
+}
+
+function sbOpenCheatsheet() {
+  output.innerHTML = '';
+  const sections = [
+    ['GETTING STARTED', [
+      ['scan',           'Find nearby networks'],
+      ['hack [id]',      'Connect to a network by ID'],
+      ['wifi-override',  'Escalate after hacking'],
+      ['tunnel [ip]',    'Reach a remote node'],
+      ['login',          'Become ROOT'],
+    ]],
+    ['FILESYSTEM', [
+      ['ls',             'List files in current dir'],
+      ['cd [path]',      'Change directory'],
+      ['cat [file]',     'Read a file'],
+      ['nano [file]',    'Edit a file'],
+      ['write [f] [txt]','Write text to a file'],
+      ['erase [file]',   'Delete a file'],
+    ]],
+    ['SECURITY', [
+      ['vpn on/off',     'Toggle VPN'],
+      ['firewall on/off','Toggle firewall'],
+      ['proxy [ip]',     'Route through proxy'],
+      ['panic',          'Emergency purge'],
+    ]],
+    ['SYSTEM', [
+      ['syshealth',      'Health diagnostic'],
+      ['restore [file]', 'Restore system file'],
+      ['regedit',        'Open registry editor'],
+      ['reg set [path]', 'Set registry value'],
+      ['sysinfo',        'Hardware info'],
+      ['specs',          'HW specs + effects'],
+    ]],
+    ['TOOLS', [
+      ['browser',        'Open web browser'],
+      ['apps',           'List installed software'],
+      ['macro record',   'Start recording macro'],
+      ['macro run [n]',  'Run a macro'],
+      ['nano [file]',    'Edit files with editor'],
+      ['theme [name]',   'Change colour theme'],
+    ]],
+  ];
+  print('╔══ CHEATSHEET ══════════════════════════════════════╗', 'sep');
+  sections.forEach(([title, cmds]) => {
+    print(`║  ── ${title} ${'─'.repeat(Math.max(0,42-title.length))}║`, 'sep');
+    cmds.forEach(([cmd, desc]) => {
+      print(`║  ${cmd.padEnd(22)} ${desc.padEnd(26)}║`, '');
+    });
+  });
+  print('╚' + '═'.repeat(52) + '╝', 'sep');
+  print('  Type help [command] or man [command] for full usage.', 'dim');
+}
+
+function sbMarkTutDone(id) {
+  tutProgress[id] = true;
+  saveTutProgress();
+  const panel = document.getElementById('sbp-tut');
+  if (panel?.classList.contains('active')) sbRefreshTutPanel();
+}
+
+function sbUpdateUplink() {
+  const badge = document.getElementById('sb-uplink-badge');
+  if (badge) {
+    badge.textContent = state.hasWifi ? 'ONLINE' : 'OFFLINE';
+    badge.className   = 'si-badge ' + (state.hasWifi ? 'ok' : 'err');
+  }
+}
 
 function newTab() {
   state.tabCount++;
@@ -3119,6 +3647,7 @@ async function processCommand(raw) {
       state.admin = true;
       updatePrompt();
       sysLogAppend('AUTH', 'ROOT login successful');
+      sbMarkTutDone('root');
       await typePrint('ROOT ACCESS GRANTED. ALL TOOLS UNLOCKED.', 'admin');
     } else {
       failedLoginAttempts++;
@@ -3160,7 +3689,7 @@ async function processCommand(raw) {
     case 'help': {
       if (args[1]) { printUsage(args[1]); break; }
       printSep();
-      await typePrint('TSCPP TERMINAL v10.0 — COMMAND REFERENCE', 'sys', 6);
+      await typePrint('TSCPP TERMINAL v11.0 — COMMAND REFERENCE', 'sys', 6);
       print('  TIP: Type "help [command]" or "man [command]" for detailed usage.', 'dim');
       printSep();
       const groups = [
@@ -3243,6 +3772,7 @@ async function processCommand(raw) {
       if (state.admin) { print('ALREADY ROOT.', 'warn'); break; }
       state.waitingPw = true;
       await typePrint('ENTER ADMINISTRATIVE KEY:', 'sys');
+      print('  TIP: Set your root key during setup, or change it with passwd root.', 'dim');
       cmdInput.type = 'password';
       cmdInput.addEventListener('keydown', function handler(e) {
         if (e.key === 'Enter') { cmdInput.type = 'text'; cmdInput.removeEventListener('keydown', handler); }
@@ -3358,6 +3888,8 @@ async function processCommand(raw) {
         );
       }
       printSep();
+      print('  TIP: Run hack [id] to connect — e.g. hack 03', 'dim');
+      sbMarkTutDone('network');
       break;
 
     case 'hack': {
@@ -3400,6 +3932,8 @@ async function processCommand(raw) {
       bumpRisk(rand(5,15));
       await typePrint(`UPLINK ESTABLISHED — ${state.currentServer}`, 'admin');
       document.getElementById('mn-ext1').classList.add('active');
+      sbMarkTutDone('tunnel');
+      print('  TIP: Run browser dark://market to access the dark web.', 'dim');
       break;
 
     case 'ping': {
@@ -3639,6 +4173,7 @@ async function processCommand(raw) {
         print(`  -${permStr}  ${tag}  ${String(files[f].length).padStart(6)} B   ${f}`, isSys && !healthy ? 'err' : '');
       });
       printSep('─', 52);
+      sbMarkTutDone('files');
       break;
     }
 
@@ -4010,6 +4545,7 @@ async function processCommand(raw) {
         saveMacros();
         await typePrint(`MACRO '${macroRecord.name}' SAVED — ${macroRecord.commands.length} COMMAND(S).`, 'success');
         toast(`SAVED: ${macroRecord.name}`, 'ok');
+        sbMarkTutDone('macro');
         macroRecord = null;
         break;
       }
@@ -4023,6 +4559,7 @@ async function processCommand(raw) {
           await processCommand(cmd);
         }
         await typePrint(`MACRO '${args[2]}' COMPLETE.`, 'success');
+        sbMarkTutDone('macro');
         break;
       }
 
@@ -4043,6 +4580,7 @@ async function processCommand(raw) {
       if (!state.admin) { print('ERR: ROOT required to open registry editor.', 'err'); break; }
       await typePrint('LAUNCHING REGISTRY EDITOR...', 'sys');
       await sleep(200);
+      sbMarkTutDone('registry');
       regeditOpen();
       break;
 
@@ -4169,6 +4707,7 @@ async function processCommand(raw) {
       if (!state.hasWifi) { print('ERR: No uplink — browser requires a network connection.', 'err'); print('Run scan → hack [id] to get online first.', 'dim'); break; }
       await typePrint('LAUNCHING TSCPP BROWSER...', 'sys');
       await sleep(300);
+      sbMarkTutDone('browser');
       brOpen(args[1] || 'tscpp://home');
       break;
     }
@@ -4268,6 +4807,8 @@ async function processCommand(raw) {
         print('  TIP: Use "restore [file]" to recover a system file from backup.', 'dim');
         print('  TIP: Use "cat [file]" to inspect current system file contents.', 'dim');
       }
+      sbMarkTutDone('health');
+      sbRefreshSysPanel();
       break;
     }
 
@@ -4340,10 +4881,11 @@ async function processCommand(raw) {
       localStorage.removeItem('tscpp_software');
       localStorage.removeItem('tscpp_hardware');
       localStorage.removeItem('tscpp_registry');
+      localStorage.removeItem('tscpp_tutorials');
 
       Object.keys(files).forEach(k => delete files[k]);
       Object.assign(files, {
-        "welcome.txt": "TSCPP Terminal v10.0 — Connection required for cloud sync.",
+        "welcome.txt": "TSCPP Terminal v11.0 — Connection required for cloud sync.",
         "note.txt":    "Protocol: SCAN -> HACK -> OVERRIDE -> TUNNEL -> EXPLOIT.",
         "readme.md":   "Welcome agent. Type HELP for command reference.",
       }, SYSTEM_FILES);
